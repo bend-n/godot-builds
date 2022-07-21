@@ -1,0 +1,37 @@
+name: Build godot 2d
+
+on: workflow_dispatch
+
+jobs:
+  build-templates:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Build templates
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          branch: 3.5
+          tools: no
+          platform: x11
+          target: release
+
+  build-editor:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Build editor
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          branch: 3.5
+          tools: yes
+          platform: x11
+          target: release
+
+  build-headless:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Build headless
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          branch: 3.5
+          tools: yes
+          platform: server
+          target: release_debug
