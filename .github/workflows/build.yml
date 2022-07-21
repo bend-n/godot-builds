@@ -13,6 +13,7 @@ jobs:
           tools: no
           platform: x11
           target: release
+          artifact-name: godot-templates
 
   build-editor:
     runs-on: ubuntu-18.04
@@ -23,7 +24,8 @@ jobs:
           branch: 3.x
           tools: yes
           platform: x11
-          target: release
+          target: release_debug
+          artifact-name: godot-editor
 
   build-headless:
     runs-on: ubuntu-18.04
@@ -35,3 +37,4 @@ jobs:
           tools: yes
           platform: server
           target: release_debug
+          artifact-name: godot-headless

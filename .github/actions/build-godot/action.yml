@@ -12,19 +12,20 @@ inputs:
     required: true
   tools:
     description: Editor / templates
-    default: no
     required: true
   platform:
     description: Platform to build for
-    default: x11
     required: true
   target:
     description: Target
-    default: release
     required: true
   flags:
     description: Flags to pass to the build
     required: false
+  artifact-name:
+    description: Artifact name
+    required: true
+    default: godot
 
 runs:
   using: "composite"
@@ -60,6 +61,7 @@ runs:
       run: |
         cd godot
         scons -j$(($(nproc)+2)) p=$PLATFORM tools=$TOOLS target=$TARGET use_lto=yes udev=yes $FLAGS
+        strip bin/* || true
         ls -lh bin/
       env:
         PLATFORM: ${{ inputs.platform }}
@@ -71,5 +73,6 @@ runs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
+        name: ${{ inputs.artifact-name }}
         path: godot/bin/*
         retention-days: 20
