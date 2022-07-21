@@ -9,7 +9,7 @@ jobs:
       - name: Build templates
         uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
         with:
-          branch: 3.5
+          branch: 3.x
           tools: no
           platform: x11
           target: release
@@ -20,7 +20,7 @@ jobs:
       - name: Build editor
         uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
         with:
-          branch: 3.5
+          branch: 3.x
           tools: yes
           platform: x11
           target: release
@@ -31,7 +31,7 @@ jobs:
       - name: Build headless
         uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
         with:
-          branch: 3.5
+          branch: 3.x
           tools: yes
           platform: server
           target: release_debug
