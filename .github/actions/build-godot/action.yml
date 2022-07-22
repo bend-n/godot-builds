@@ -2,48 +2,37 @@ name: Build godot
 description: Builds godot with a certain version and certain flags
 
 inputs:
-  branch:
-    description: The branch of godot to build
-    default: 3.x
-    required: true
   url:
     description: Godot git url
     default: https://github.com/godotengine/godot
     required: true
-  tools:
-    description: To build the tools (aka the editor)
-    required: true
   platform:
     description: Platform to build for
-    default: x11
-    required: true
-  target:
-    description: Target (debug|release_debug|release)
     required: true
   flags:
-    description: Flags to pass to the build
+    description: Flags to pass to the build script
     required: false
-  artifact-name:
-    description: Artifact name
-    required: true
-    default: godot
 
 runs:
   using: "composite"
   steps:
-    - name: Setup
+    - name: Checkout
       run: |
-        [[ -d godot ]] && exit 0 # we already setup
-        sudo apt-get update -qq
+        [[ -d godot ]] && exit 0 # already checked out
+        git clone --depth 1 "${{ inputs.url }}" -b "${{ env.branch }}" godot
+        cd godot
+        curl 'https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py' --output custom.py || wget -nv 'https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py' -O custom.py
+      shell: bash
+
+    - name: Install linux dependencies
+      if: ${{ inputs.platform }} == "x11"
+      run: |
+        [[ ${{ inputs.platform }} != "x11" ]] && exit 0
+        sudo apt-get update -q
         sudo apt-get install -qqq \
           build-essential pkg-config libx11-dev libxcursor-dev \
           libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev \
-          libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
-        git clone --depth 1 "$URL" -b "$BRANCH" godot
-        cd godot && wget -nv 'https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py'
-      env:
-        BRANCH: ${{ inputs.branch }}
-        URL: ${{ inputs.url }}
+          libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm tree
       shell: bash
 
     - name: Setup Python
@@ -62,19 +51,9 @@ runs:
     - name: Build Godot
       run: |
         cd godot
-        scons -j$(($(nproc)+2)) p=$PLATFORM tools=$TOOLS target=$TARGET use_lto=yes udev=yes $FLAGS
+        scons_flags=$flags
+        [[ -z "${{ inputs.flags }}" ]] && scons_flags=${{ inputs.flags }}
+        scons -j$(($(nproc)+2)) p=${{ inputs.platform }} tools=$tools target=$target use_lto=yes udev=yes $scons_flags
         strip bin/* || true
-        ls -lh bin/
-      env:
-        PLATFORM: ${{ inputs.platform }}
-        FLAGS: ${{ inputs.flags }}
-        TOOLS: ${{ inputs.tools }}
-        TARGET: ${{ inputs.target }}
+        ls bin
       shell: bash
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ inputs.artifact-name }}
-        path: godot/bin/*
-        retention-days: 20

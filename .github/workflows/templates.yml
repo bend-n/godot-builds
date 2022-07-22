@@ -1,0 +1,119 @@
+name: Build godot 2d templates
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  branch: 3.x
+  tools: no
+  target: release
+  flags: disable_3d=yes
+
+jobs:
+  linux:
+    name: Build linux templates
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Compilation
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          platform: x11
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+
+  windows:
+    name: Build windows templates
+    runs-on: windows-latest
+    steps:
+      - name: Compilation
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          platform: windows
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+
+  android:
+    name: Build android templates
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Java 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Compilation (armv7)
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          flags: android_arch=armv7 ${{ env.flags }}
+          platform: android
+
+      - name: Compilation (arm64v8)
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          flags: android_arch=arm64v8 ${{ env.flags }}
+          platform: android
+
+      - name: Generate Godot templates
+        run: |
+          cd godot
+          (cd platform/android/java && ./gradlew generateGodotTemplates)
+          ls -l bin/
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+
+  macos:
+    name: Build macos templates
+    runs-on: macos-latest
+    steps:
+      - name: Compilation
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          platform: macos
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+
+  javascript:
+    name: Build javascript templates
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Emscripten 3.1.10
+        uses: mymindstorm/setup-emsdk@v10
+        with:
+          version: 3.1.10
+
+      - name: Verify Emscripten setup
+        run: |
+          emcc -v
+
+      - name: Compilation
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          platform: javascript
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+
+  bundle:
+    needs: [javascript, macos, windows, linux, android]
+    name: Bundle up all templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Bundle
+        run: |
+          zip -r templates.tpz *
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        with:
+          name: templates.tpz
+          path: templates.tpz

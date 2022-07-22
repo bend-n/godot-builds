@@ -1,0 +1,37 @@
+name: Build godot 2d headless and editor for linux
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  branch: 3.x
+  tools: yes
+  target: release_debug
+
+jobs:
+  linux-editor:
+    name: Build editor
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Build editor
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          platform: x11
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+
+  linux-headless:
+    name: Build headless
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Build headless
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          platform: server
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main

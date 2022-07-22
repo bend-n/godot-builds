@@ -1,0 +1,31 @@
+# from https://github.com/godotengine/godot/blob/b3bd08207032ca146319f4b25654bcddd31ee401/.github/actions/upload-artifact/action.yml
+
+name: Upload artifact
+description: Uploads the artifact
+inputs:
+  name:
+    description: The artifact name.
+    default: "${{ github.job }}"
+    required: true
+  path:
+    description: The path to upload.
+    required: true
+    default: "godot/bin/*"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Upload Godot Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        retention-days: 14
+        if-no-files-found: error
+
+    - name: Check files on failure
+      if: failure()
+      run: |
+        pwd || true
+        tree
+      shell: bash
