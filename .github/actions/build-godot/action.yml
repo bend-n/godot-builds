@@ -55,8 +55,11 @@ runs:
       run: |
         cd godot
         scons_flags=$flags
-        [[ -z "${{ inputs.flags }}" ]] && scons_flags=${{ inputs.flags }}
-        scons -j$(($(nproc)+2)) p=${{ inputs.platform }} tools=$tools target=${{ inputs.target }} use_lto=yes udev=yes $scons_flags
+        cores=$(nproc) || cores=$(sysctl -n hw.ncpu)
+        [[ -n "${{ inputs.flags }}" ]] && scons_flags="${{ inputs.flags }}"
+        command="scons -j$((cores+2)) p=${{ inputs.platform }} tools=$tools target=${{ inputs.target }} use_lto=yes udev=yes $scons_flags"
+        echo "running scons: $command"
+        $command
         strip bin/* || true
         ls bin
       shell: bash

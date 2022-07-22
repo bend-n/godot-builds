@@ -6,26 +6,25 @@ on:
     branches:
       - main
 
-env:
-  branch: 3.x
-  tools: yes
-
 jobs:
   build:
     strategy:
       matrix:
-        target: [release, release_debug]
+        platform: [server, x11]
 
-    name: Build editor
+    name: Build
     runs-on: ubuntu-18.04
     steps:
       - name: Build editor
         uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
         with:
-          platform: x11
-          target: ${{ matrix.target }}
+          platform: ${{ matrix.platform }}
+          target: release_debug
+        env:
+          branch: 3.x
+          tools: yes
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
         with:
-          name: linux-editor-${{ matrix.target }}
+          name: ${{ matrix.platform }}-tools-release
