@@ -9,10 +9,13 @@ on:
 env:
   branch: 3.x
   tools: yes
-  target: release_debug
 
 jobs:
-  linux-editor:
+  build:
+    strategy:
+      matrix:
+        target: [release, release_debug]
+
     name: Build editor
     runs-on: ubuntu-18.04
     steps:
@@ -20,18 +23,9 @@ jobs:
         uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
         with:
           platform: x11
+          target: ${{ matrix.target }}
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
-
-  linux-headless:
-    name: Build headless
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Build headless
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
         with:
-          platform: server
-
-      - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+          name: linux-editor-${{ matrix.target }}

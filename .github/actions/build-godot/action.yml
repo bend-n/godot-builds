@@ -12,6 +12,9 @@ inputs:
   flags:
     description: Flags to pass to the build script
     required: false
+  target:
+    description: Target (release, release_debug, debug)
+    required: true
 
 runs:
   using: "composite"
@@ -53,7 +56,7 @@ runs:
         cd godot
         scons_flags=$flags
         [[ -z "${{ inputs.flags }}" ]] && scons_flags=${{ inputs.flags }}
-        scons -j$(($(nproc)+2)) p=${{ inputs.platform }} tools=$tools target=$target use_lto=yes udev=yes $scons_flags
+        scons -j$(($(nproc)+2)) p=${{ inputs.platform }} tools=$tools target=${{ inputs.target }} use_lto=yes udev=yes $scons_flags
         strip bin/* || true
         ls bin
       shell: bash
