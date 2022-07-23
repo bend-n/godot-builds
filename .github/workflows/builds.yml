@@ -1,12 +1,15 @@
-name: Build godot 2d templates
+name: Build godot 2d
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+  pull_request:
 
 env:
+  version-name: 3.5
+  release: rc
   branch: 3.x
   tools: no
   flags: disable_3d=yes
@@ -29,6 +32,8 @@ jobs:
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        with:
+          path: godot/bin/*.64
 
   windows:
     strategy:
@@ -47,6 +52,8 @@ jobs:
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        with:
+          path: godot/bin/*.exe
 
   android:
     name: Build android templates
@@ -78,10 +85,11 @@ jobs:
         run: |
           cd godot
           (cd platform/android/java && ./gradlew generateGodotTemplates)
-          ls -l bin/
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        with:
+          path: godot/bin/*.apk
 
   macos:
     strategy:
@@ -111,12 +119,13 @@ jobs:
           cd godot
           intel=bin/godot.osx.*.x86_64
           arm=bin/godot.osx.*.arm64
-          echo "--" && ls bin/ && echo $arm && echo $intel && echo "--"
           lipo -create $intel $arm -output "bin/godot.osx.opt$target.universal"
           strip "bin/godot.osx.opt$target.universal"
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        with:
+          path: godot/bin/*.universal
 
   javascript:
     strategy:
@@ -144,16 +153,18 @@ jobs:
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        with:
+          path: godot/bin/*.zip
 
-  bundle:
+  templates:
     needs: [javascript, macos, windows, linux, android]
     name: Bundle up all templates
     runs-on: ubuntu-latest
     env:
-      tmps: "../templates"
+      tmps: "templates"
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: Prepare files
         run: |
@@ -180,14 +191,75 @@ jobs:
           zip -q -9 -r ${tmps}/osx.zip osx_template.app
 
           echo "Preparing web"
-          mv javascript/godot.javascript.opt.zip webassembly_release.zip
-          mv javascript/godot.javascript.opt.debug.zip webassembly_debug.zip
+          mv javascript/godot.javascript.opt.zip ${tmps}/webassembly_release.zip
+          mv javascript/godot.javascript.opt.debug.zip ${tmps}/webassembly_debug.zip
 
       - name: Prepare bundle
-        run: "zip -q -9 -r templates.tpz ${tmps}/*"
+        run: "cd ${tmps} && zip -q -9 -r templates.tpz ./*"
 
       - name: Upload artifact
         uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
         with:
-          name: templates.tpz
-          path: templates.tpz
+          path: ${{ env.tmps }}/templates.tpz
+
+  tools:
+    strategy:
+      matrix:
+        platform: [server, x11]
+
+    name: Build linux tools
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Build editor
+        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        with:
+          platform: ${{ matrix.platform }}
+          target: release_debug
+        env:
+          tools: yes
+          flags: "" # override flags
+
+      - name: Upload artifact
+        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        with:
+          name: ${{ matrix.platform }}-tools-release
+          path: godot/bin/*.64
+
+  build-image:
+    name: Build docker image
+    runs-on: ubuntu-latest
+    needs: [tools, templates]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get templates
+        uses: actions/download-artifact@v3
+        with:
+          name: templates
+
+      - name: Get headless
+        uses: actions/download-artifact@v3
+        with:
+          name: server-tools-release
+
+      - run: mv godot_server.x11.opt.tools.64 godot && chmod +x godot
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1.14.1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/godot-2d:${{ env.version-name }}${{ env.tag }}
+          build-args: |
+            GODOT_VERSION=${{ env.version-name }}
+            RELEASE_NAME=${{ env.release }}
+        env:
+          tag: ${{ env.release != 'stable' && format('.{0}', env.release) || '' }}

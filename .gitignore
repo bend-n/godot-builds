@@ -1,0 +1,6 @@
+x11-tools-release/
+templates/
+*.64
+godot
+templates.tpz
+.vscode/
