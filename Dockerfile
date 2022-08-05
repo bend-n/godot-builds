@@ -1,5 +1,5 @@
 FROM ubuntu:focal
-LABEL author="https://github.com/aBARICHELLO/godot-ci/graphs/contributors + bendn"
+LABEL author="bendn"
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
@@ -31,7 +31,7 @@ RUN mkdir ~/.cache \
     && rm /root/templates.tpz
 
 # Install editor-settings.tres
-ADD https://raw.githubusercontent.com/bend-n/godot-ci/editor-settings/editor-settings.tres /root/.config/godot/editor_settings-3.tres
+ADD https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/editor-settings.tres /root/.config/godot/editor_settings-3.tres
 
 # Test if godot is working
 RUN godot -e -q
