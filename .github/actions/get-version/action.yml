@@ -1,5 +1,5 @@
-name: Get version of a branch
-description: Get version of a branch from version.py
+name: Get version
+description: Get version of godot from version.py
 
 runs:
   using: "composite"
@@ -7,12 +7,12 @@ runs:
     - name: Setup
       uses: bend-n/godot-2d-builds/.github/actions/setup@main
       with:
-        branch: ${{ env.branch }}
+        ref: ${{ env.ref }}
 
     - name: Setup Python
       uses: actions/setup-python@v2
 
-    - name: Get version of branch
+    - name: Get version
       run: |
         cd godot
         echo 'print(f"{major}.{minor}")' >> version.py

@@ -22,7 +22,7 @@ runs:
     - name: Setup
       uses: bend-n/godot-2d-builds/.github/actions/setup@main
       with:
-        branch: ${{ env.branch }}
+        ref: ${{ env.ref }}
 
     - name: Install linux dependencies
       if: ${{ inputs.platform }} == "x11"

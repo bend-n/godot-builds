@@ -12,5 +12,5 @@ jobs:
     name: Build 3.x
     uses: bend-n/godot-2d-builds/.github/workflows/reusable-build.yml@main
     with:
-      branch: 3.x
+      ref: 3.x
     secrets: inherit

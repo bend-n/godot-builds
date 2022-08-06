@@ -3,7 +3,7 @@ name: Reusable build workflow
 on:
   workflow_call:
     inputs:
-      branch:
+      ref:
         required: true
         type: string
       flags:
@@ -12,7 +12,7 @@ on:
         required: false
 
 env:
-  branch: ${{ inputs.branch }}
+  ref: ${{ inputs.ref }}
   flags: ${{ inputs.flags }}
   tools: no
 
