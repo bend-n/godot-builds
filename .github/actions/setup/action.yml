@@ -1,0 +1,21 @@
+name: "Setup"
+description: "Setup the environment for building"
+
+inputs:
+  url:
+    description: Godot git url
+    default: https://github.com/godotengine/godot
+    required: true
+  branch:
+    description: Which branch to build
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      run: |
+        [[ -d godot ]] && exit 0 # already checked out
+        git clone --depth 1 "${{ inputs.url }}" -b "${{ inputs.branch }}" godot
+        curl 'https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py' --output godot/custom.py || wget -nv 'https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py' -O godot/custom.py
+      shell: bash

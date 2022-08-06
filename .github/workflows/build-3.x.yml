@@ -1,0 +1,16 @@
+name: Build godot 2d on branch 3.x
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-3x:
+    name: Build 3.x
+    uses: bend-n/godot-2d-builds/.github/workflows/reusable-build.yml@main
+    with:
+      branch: 3.x
+    secrets: inherit

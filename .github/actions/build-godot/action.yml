@@ -19,13 +19,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      run: |
-        [[ -d godot ]] && exit 0 # already checked out
-        git clone --depth 1 "${{ inputs.url }}" -b "${{ env.branch }}" godot
-        cd godot
-        curl 'https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py' --output custom.py || wget -nv 'https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py' -O custom.py
-      shell: bash
+    - name: Setup
+      uses: bend-n/godot-2d-builds/.github/actions/setup@main
+      with:
+        branch: ${{ env.branch }}
 
     - name: Install linux dependencies
       if: ${{ inputs.platform }} == "x11"
@@ -35,20 +32,18 @@ runs:
         sudo apt-get install -qqq \
           build-essential pkg-config libx11-dev libxcursor-dev \
           libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev \
-          libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm tree
+          libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm \
+          libspeechd-dev speech-dispatcher \
+          tree
       shell: bash
 
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        python-version: "3.9.1"
+        python-version: 3.9
 
-    - name: Setup SCons
-      run: |
-        python -c "import sys; print(sys.version)"
-        python -m pip install scons
-        python --version
-        scons --version
+    - name: Setup scons
+      run: pip install scons
       shell: bash
 
     - name: Build Godot
@@ -57,9 +52,7 @@ runs:
         scons_flags=$flags
         cores=$(nproc) || cores=$(sysctl -n hw.ncpu)
         [[ -n "${{ inputs.flags }}" ]] && scons_flags="${{ inputs.flags }}"
-        command="scons -j$((cores+2)) p=${{ inputs.platform }} tools=$tools target=${{ inputs.target }} use_lto=yes udev=yes $scons_flags"
-        echo "running scons: $command"
-        $command
+        scons -j$((cores+2)) p=${{ inputs.platform }} tools=$tools target=${{ inputs.target }} use_lto=yes udev=yes $scons_flags
         strip bin/* || true
         ls bin
       shell: bash

@@ -1,0 +1,27 @@
+name: Manually build godot 2d
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: choice
+        description: which branch to build
+        required: true
+        options:
+          - "2.0"
+          - "2.1"
+          - "3.0"
+          - "3.1"
+          - "3.2"
+          - "3.3"
+          - "3.4"
+          - "3.5"
+          - "3.x"
+
+jobs:
+  manual-build:
+    name: Build ${{ inputs.branch }}
+    uses: bend-n/godot-2d-builds/.github/workflows/reusable-build.yml@main
+    with:
+      branch: ${{ inputs.branch }}
+    secrets: inherit

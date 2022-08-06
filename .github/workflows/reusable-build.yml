@@ -1,18 +1,20 @@
-name: Build godot 2d
+name: Reusable build workflow
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+      flags:
+        type: string
+        default: disable_3d=yes
+        required: false
 
 env:
-  version-name: 3.5
-  release: rc
-  branch: 3.x
+  branch: ${{ inputs.branch }}
+  flags: ${{ inputs.flags }}
   tools: no
-  flags: disable_3d=yes
 
 jobs:
   linux:
@@ -230,36 +232,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [tools, templates]
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Get templates
-        uses: actions/download-artifact@v3
+      - uses: bend-n/godot-2d-builds/.github/actions/build-upload-image@main
         with:
-          name: templates
-
-      - name: Get headless
-        uses: actions/download-artifact@v3
-        with:
-          name: server-tools-release
-
-      - run: mv godot_server.x11.opt.tools.64 godot && chmod +x godot
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1.14.1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/godot-2d:${{ env.version-name }}${{ env.tag }}
-          build-args: |
-            GODOT_VERSION=${{ env.version-name }}
-            RELEASE_NAME=${{ env.release }}
-        env:
-          tag: ${{ env.release != 'stable' && format('.{0}', env.release) || '' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

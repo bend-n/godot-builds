@@ -1,0 +1,33 @@
+name: Get version of a branch
+description: Get version of a branch from version.py
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup
+      uses: bend-n/godot-2d-builds/.github/actions/setup@main
+      with:
+        branch: ${{ env.branch }}
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+
+    - name: Get version of branch
+      run: |
+        cd godot
+        echo 'print(f"{major}.{minor}")' >> version.py
+        echo "version-name=$(python version.py)" >> $GITHUB_ENV
+        version=$(python version.py)
+
+        git checkout version.py
+
+        echo 'print(status)' >> version.py
+        echo "release=$(python version.py)" >> $GITHUB_ENV
+        release=$(python version.py)
+        echo "#### ${version}.${release} :rocket:" >> $GITHUB_STEP_SUMMARY
+      shell: bash
+
+    - name: Post get version
+      if: always()
+      run: rm -rf godot
+      shell: bash
