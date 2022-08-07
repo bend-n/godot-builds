@@ -1,15 +1,12 @@
-name: Build godot 2d on branch 3.x
+name: Build godot 3.5 stable
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
-  build-3x:
-    name: Build 3.x
+  build3-5-stable:
+    name: Build 3.5 stable
     uses: bend-n/godot-2d-builds/.github/workflows/reusable-build.yml@main
     with:
-      ref: 3.x
+      ref: 3.5-stable
     secrets: inherit
