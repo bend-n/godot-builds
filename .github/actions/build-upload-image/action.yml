@@ -5,6 +5,10 @@ inputs:
   github-token:
     required: true
     description: GitHub token
+  name:
+    required: true
+    description: Name of the package
+    default: godot-2d
 
 runs:
   using: "composite"
@@ -40,7 +44,7 @@ runs:
         context: .
         file: Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/godot-2d:${{ env.version-name }}${{ env.tag }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}:${{ env.version-name }}${{ env.tag }}
         build-args: |
           GODOT_VERSION=${{ env.version-name }}
           RELEASE_NAME=${{ env.release }}

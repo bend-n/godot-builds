@@ -30,6 +30,5 @@ runs:
     - name: Get module data
       if: steps.clean.outputs.clean == 'true'
       run: |
-        modules='https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/custom.py'
-        curl "$modules" --output godot/custom.py || wget -nv "$modules" -O godot/custom.py
+        curl "${{ env.modules }}" --output godot/custom.py || wget -nv "$modules" -O godot/custom.py
       shell: bash

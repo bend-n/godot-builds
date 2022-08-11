@@ -10,10 +10,19 @@ on:
         type: string
         default: disable_3d=yes
         required: false
+      modules-url:
+        type: string
+        default: "https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/2d-build-modules.py"
+        required: false
+      name:
+        type: string
+        default: godot-2d
+        required: false
 
 env:
   ref: ${{ inputs.ref }}
   flags: ${{ inputs.flags }}
+  modules: ${{ inputs.modules-url }}
   tools: no
 
 jobs:
@@ -235,3 +244,4 @@ jobs:
       - uses: bend-n/godot-2d-builds/.github/actions/build-upload-image@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ inputs.name }}
