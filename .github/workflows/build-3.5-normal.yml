@@ -1,0 +1,20 @@
+name: Build godot 3.5 stable (normal)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/normal*.py
+      - "**.yml"
+
+jobs:
+  build:
+    name: Build
+    uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@main
+    with:
+      ref: 3.5-stable
+      name: godot
+      modules-url: https://raw.githubusercontent.com/bend-n/godot-builds/main/.github/normal-build-modules.py
+    secrets: inherit

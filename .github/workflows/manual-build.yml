@@ -11,7 +11,7 @@ on:
 jobs:
   manual-build:
     name: Build ${{ inputs.ref }}
-    uses: bend-n/godot-2d-builds/.github/workflows/reusable-build.yml@main
+    uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@main
     with:
       ref: ${{ inputs.ref }}
     secrets: inherit

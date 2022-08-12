@@ -12,7 +12,7 @@ on:
         required: false
       modules-url:
         type: string
-        default: "https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/2d-build-modules.py"
+        default: "https://raw.githubusercontent.com/bend-n/godot-builds/main/.github/2d-build-modules.py"
         required: false
       name:
         type: string
@@ -27,7 +27,7 @@ env:
 
 jobs:
   linux:
-    name: Build linux templates
+    name: Linux temps
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -35,14 +35,14 @@ jobs:
         bits: [64]
     steps:
       - name: Compilation
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           target: ${{ matrix.target }}
           flags: bits=${{ matrix.bits }} ${{ env.flags }}
           platform: x11
 
       - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           path: godot/bin/*.64
 
@@ -51,23 +51,23 @@ jobs:
       matrix:
         target: [release, release_debug]
         bits: [64]
-    name: Build windows templates
+    name: Win temps
     runs-on: windows-latest
     steps:
       - name: Compilation
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           target: ${{ matrix.target }}
           flags: bits=${{ matrix.bits }} ${{ env.flags }}
           platform: windows
 
       - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           path: godot/bin/*.exe
 
   android:
-    name: Build android templates
+    name: Android temps
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -79,14 +79,14 @@ jobs:
           java-version: 11
 
       - name: Compilation (armv7)
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           target: ${{ matrix.target }}
           flags: android_arch=armv7 ${{ env.flags }}
           platform: android
 
       - name: Compilation (arm64v8)
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           target: ${{ matrix.target }}
           flags: android_arch=arm64v8 ${{ env.flags }}
@@ -98,7 +98,7 @@ jobs:
           (cd platform/android/java && ./gradlew generateGodotTemplates)
 
       - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           path: godot/bin/*.apk
 
@@ -107,18 +107,18 @@ jobs:
       matrix:
         target: [release, release_debug]
 
-    name: Build macos templates
+    name: MacOS temps
     runs-on: macos-latest
     steps:
       - name: Compilation(x86_64)
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           flags: arch=x86_64 ${{ env.flags }}
           target: ${{ matrix.target }}
           platform: macos
 
       - name: Compilation(arm64)
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           flags: arch=arm64 ${{ env.flags }}
           target: ${{ matrix.target }}
@@ -134,7 +134,7 @@ jobs:
           strip "bin/godot.osx.opt$target.universal"
 
       - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           path: godot/bin/*.universal
 
@@ -142,8 +142,9 @@ jobs:
     strategy:
       matrix:
         target: [release, release_debug]
+        flags: [gdnative_enabled=yes, threads_enabled=yes, ""]
 
-    name: Build javascript templates
+    name: JS temps
     runs-on: ubuntu-20.04
     steps:
       - name: Set up Emscripten 3.1.10
@@ -156,20 +157,20 @@ jobs:
           emcc -v
 
       - name: Compilation
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           target: ${{ matrix.target }}
-          flags: ${{ env.flags }}
+          flags: ${{ env.flags }} ${{ matrix.flags }}
           platform: javascript
 
       - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           path: godot/bin/*.zip
 
   templates:
     needs: [javascript, macos, windows, linux, android]
-    name: Bundle up all templates
+    name: Bundle all templates
     runs-on: ubuntu-latest
     env:
       tmps: "templates"
@@ -204,12 +205,16 @@ jobs:
           echo "Preparing web"
           mv javascript/godot.javascript.opt.zip ${tmps}/webassembly_release.zip
           mv javascript/godot.javascript.opt.debug.zip ${tmps}/webassembly_debug.zip
+          mv javascript/godot.javascript.opt.threads.zip ${tmps}/webassembly_threads_release.zip
+          mv javascript/godot.javascript.opt.debug.threads.zip ${tmps}/webassembly_threads_debug.zip
+          mv javascript/godot.javascript.opt.gdnative.zip ${tmps}/webassembly_gdnative_release.zip
+          mv javascript/godot.javascript.opt.debug.gdnative.zip ${tmps}/webassembly_gdnative_debug.zip
 
       - name: Prepare bundle
         run: "cd ${tmps} && zip -q -9 -r templates.tpz ./*"
 
       - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           path: ${{ env.tmps }}/templates.tpz
 
@@ -222,7 +227,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Build editor
-        uses: bend-n/godot-2d-builds/.github/actions/build-godot@main
+        uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           platform: ${{ matrix.platform }}
           target: release_debug
@@ -231,7 +236,7 @@ jobs:
           flags: "" # override flags
 
       - name: Upload artifact
-        uses: bend-n/godot-2d-builds/.github/actions/upload-artifact@main
+        uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           name: ${{ matrix.platform }}-tools-release
           path: godot/bin/*.64
@@ -241,7 +246,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [tools, templates]
     steps:
-      - uses: bend-n/godot-2d-builds/.github/actions/build-upload-image@main
+      - uses: bend-n/godot-builds/.github/actions/build-upload-image@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: ${{ inputs.name }}

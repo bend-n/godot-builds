@@ -20,7 +20,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup
-      uses: bend-n/godot-2d-builds/.github/actions/setup@main
+      uses: bend-n/godot-builds/.github/actions/setup@main
       with:
         ref: ${{ env.ref }}
 

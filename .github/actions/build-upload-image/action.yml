@@ -16,7 +16,7 @@ runs:
     - uses: actions/checkout@v3
 
     - name: Get version
-      uses: bend-n/godot-2d-builds/.github/actions/get-version@main
+      uses: bend-n/godot-builds/.github/actions/get-version@main
 
     - name: Get templates
       uses: actions/download-artifact@v3

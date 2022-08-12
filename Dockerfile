@@ -31,7 +31,7 @@ RUN mkdir ~/.cache \
     && rm /root/templates.tpz
 
 # Install editor-settings.tres
-ADD https://raw.githubusercontent.com/bend-n/godot-2d-builds/main/.github/editor-settings.tres /root/.config/godot/editor_settings-3.tres
+ADD https://raw.githubusercontent.com/bend-n/godot-builds/main/.github/editor-settings.tres /root/.config/godot/editor_settings-3.tres
 
 # Test if godot is working
 RUN godot -e -q
