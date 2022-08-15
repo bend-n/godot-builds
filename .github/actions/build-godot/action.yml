@@ -37,11 +37,6 @@ runs:
           tree
       shell: bash
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-
     - name: Setup scons
       run: pip install scons
       shell: bash

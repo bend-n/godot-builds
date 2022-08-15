@@ -16,5 +16,5 @@ jobs:
     with:
       ref: 3.5-stable
       name: godot
-      modules-url: https://raw.githubusercontent.com/bend-n/godot-builds/main/.github/normal-build-modules.py
+      modules-path: ./.github/normal-build-modules.py
     secrets: inherit

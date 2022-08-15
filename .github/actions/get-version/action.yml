@@ -9,9 +9,6 @@ runs:
       with:
         ref: ${{ env.ref }}
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-
     - name: Get version
       run: |
         cd godot

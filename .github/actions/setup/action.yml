@@ -27,8 +27,24 @@ runs:
         ref: ${{ inputs.ref }}
         path: "godot"
 
-    - name: Get module data
+    - uses: actions/checkout@v3
+      if: steps.clean.outputs.clean == 'true'
+      with:
+        path: "repo"
+
+    - name: Setup Python
+      if: steps.clean.outputs.clean == 'true'
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Apply patches to godot
       if: steps.clean.outputs.clean == 'true'
       run: |
-        curl "${{ env.modules }}" --output godot/custom.py || wget -nv "$modules" -O godot/custom.py
+        # Patch godot
+        echo "::group::Patch godot"
+        (cd repo && mv "${{ env.modules }}" ../godot/custom.py && mv patches ../godot)
+        cd godot
+        for patch in patches/*; do git apply --ignore-whitespace "$patch" || echo "::error file={${patch}}::Go update your patch"; done
+        echo "::endgroup::"
       shell: bash

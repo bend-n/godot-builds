@@ -10,9 +10,9 @@ on:
         type: string
         default: disable_3d=yes
         required: false
-      modules-url:
+      modules-path:
         type: string
-        default: "https://raw.githubusercontent.com/bend-n/godot-builds/main/.github/2d-build-modules.py"
+        default: ./.github/2d-build-modules.py
         required: false
       name:
         type: string
@@ -22,7 +22,7 @@ on:
 env:
   ref: ${{ inputs.ref }}
   flags: ${{ inputs.flags }}
-  modules: ${{ inputs.modules-url }}
+  modules: ${{ inputs.modules-path }}
   tools: no
 
 jobs:
