@@ -16,5 +16,6 @@ jobs:
     with:
       ref: 3.5-stable
       name: godot
+      build-name: normal
       modules-path: ./.github/normal-build-modules.py
     secrets: inherit

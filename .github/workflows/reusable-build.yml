@@ -18,8 +18,13 @@ on:
         type: string
         default: godot-2d
         required: false
+      build-name:
+        type: string
+        default: 2d
+        required: false
 
 env:
+  BUILD_NAME: ${{ inputs.build-name }}
   ref: ${{ inputs.ref }}
   flags: ${{ inputs.flags }}
   modules: ${{ inputs.modules-path }}
