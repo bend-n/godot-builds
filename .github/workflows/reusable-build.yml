@@ -255,3 +255,13 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: ${{ inputs.name }}
+
+  release:
+    name: Create/update a release
+    runs-on: ubuntu-latest
+    needs: [tools, templates]
+    steps:
+      - uses: bend-n/godot-builds/.github/actions/release@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ inputs.name }}

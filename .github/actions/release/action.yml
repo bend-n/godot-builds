@@ -1,0 +1,51 @@
+name: Build upload docker image
+description: Build and upload docker image to ghcr.io
+
+inputs:
+  github-token:
+    required: true
+    description: GitHub token
+  name:
+    required: false
+    description: Name of the package
+    default: godot-2d
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Get version
+      uses: bend-n/godot-builds/.github/actions/get-version@main
+
+    - name: Get templates
+      uses: actions/download-artifact@v3
+      with:
+        name: templates
+
+    - name: Get headless
+      uses: actions/download-artifact@v3
+      with:
+        name: server-tools-release
+
+    - name: Get editor
+      uses: actions/download-artifact@v3
+      with:
+        name: x11-tools-release
+
+    - name: Compress
+      run: |
+        mv godot.x11.opt.tools.64 Godot_v3.5-stable_x11.64 && xz -ze9T0 Godot_v3.5-stable_x11.64 &
+        mv godot_server.x11.opt.tools.64 "${{ inputs.name }}_v3.5-stable_linux_headless.64" && xz -ze9T0 "${{ inputs.name }}_v3.5-stable_linux_headless.64" &
+        mv templates.tpz Godot_v3.5-stable_export_templates.tpz
+      shell: bash
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: "### ${{ env.release-name}} :rocket:"
+        tag_name: ${{ env.release-name }}
+        files: |
+          Godot_v3.5-stable_export_templates.tpz
+          Godot_v3.5-stable_x11.64
+        token: ${{ inputs.github-token }}

@@ -49,4 +49,4 @@ runs:
           GODOT_VERSION=${{ env.version-name }}
           RELEASE_NAME=${{ env.release }}
       env:
-        tag: ${{ env.release != 'stable' && format('.{0}', env.release) || '' }}
+        tag: ${{ env.release-name }}

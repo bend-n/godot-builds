@@ -1,5 +1,5 @@
 diff --git a/main/main.cpp b/main/main.cpp
-index 37ef4332..f4baf553 100644
+index 37ef4332..ecc30d7e 100644
 --- a/main/main.cpp
 +++ b/main/main.cpp
 @@ -128,7 +128,9 @@ static int audio_driver_idx = -1;
@@ -40,7 +40,7 @@ index 37ef4332..f4baf553 100644
  
  /* Engine initialization
   *
-@@ -493,9 +495,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -493,13 +495,22 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  #endif
  
  		List<String>::Element *N = I->next();
@@ -51,7 +51,22 @@ index 37ef4332..f4baf553 100644
  			show_help = true;
  			exit_code = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
  			goto error;
-@@ -737,7 +738,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+-
++#else
++		if (I->get() == "--main-pack") { // needed for JS bindings
++			if (I->next()) {
++				main_pack = I->next()->get();
++				N = I->next()->next();
++			} else {
++				OS::get_singleton()->print("Missing path to main pack file, aborting.\n");
++				goto error;
++			};
++#endif
++#ifdef TOOLS_ENABLED
+ 		} else if (I->get() == "--version") {
+ 			print_line(get_full_version_string());
+ 			exit_code = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
+@@ -737,7 +748,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  				OS::get_singleton()->print("Missing render thread mode argument, aborting.\n");
  				goto error;
  			}
@@ -59,7 +74,7 @@ index 37ef4332..f4baf553 100644
  		} else if (I->get() == "-e" || I->get() == "--editor") { // starts editor
  
  			editor = true;
-@@ -773,7 +773,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -773,7 +783,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  
  			editor = true;
  			main_args.push_back(I->get());
@@ -67,7 +82,7 @@ index 37ef4332..f4baf553 100644
  		} else if (I->get() == "--path") { // set path of project to start or edit
  
  			if (I->next()) {
-@@ -806,9 +805,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -806,9 +815,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  			} else {
  				project_path = path;
  			}
@@ -77,18 +92,31 @@ index 37ef4332..f4baf553 100644
  		} else if (I->get() == "-b" || I->get() == "--breakpoints") { // add breakpoints
  
  			if (I->next()) {
-@@ -902,6 +899,10 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
- 		}
+@@ -840,15 +847,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ 				goto error;
+ 			}
  
- 		I = N;
-+#else
-+		main_args.push_back(I->get());
-+		I = N;
+-		} else if (I->get() == "--main-pack") {
+-			if (I->next()) {
+-				main_pack = I->next()->get();
+-				N = I->next()->next();
+-			} else {
+-				OS::get_singleton()->print("Missing path to main pack file, aborting.\n");
+-				goto error;
+-			};
+-
+ 		} else if (I->get() == "-d" || I->get() == "--debug") {
+ 			debug_mode = "local";
+ 			OS::get_singleton()->_debug_stdout = true;
+@@ -897,6 +895,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ 			OS::get_singleton()->disable_crash_handler();
+ 		} else if (I->get() == "--skip-breakpoints") {
+ 			skip_breakpoints = true;
 +#endif
- 	}
- 
- #ifdef TOOLS_ENABLED
-@@ -909,7 +910,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ 		} else {
+ 			main_args.push_back(I->get());
+ 		}
+@@ -909,7 +908,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  		OS::get_singleton()->print("Error: Command line arguments implied opening both editor and project manager, which is not possible. Aborting.\n");
  		goto error;
  	}
@@ -96,7 +124,7 @@ index 37ef4332..f4baf553 100644
  
  	// Network file system needs to be configured before globals, since globals are based on the
  	// 'project.godot' file which will only be available through the network if this is enabled
-@@ -932,7 +932,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -932,7 +930,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  
  		FileAccess::make_default<FileAccessNetwork>(FileAccess::ACCESS_RESOURCES);
  	}
@@ -105,7 +133,7 @@ index 37ef4332..f4baf553 100644
  	if (globals->setup(project_path, main_pack, upwards, editor) == OK) {
  #ifdef TOOLS_ENABLED
  		found_project = true;
-@@ -1001,12 +1001,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -1001,12 +999,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  	if (editor) {
  		packed_data->set_disabled(true);
  		globals->set_disable_feature_overrides(true);
@@ -118,7 +146,7 @@ index 37ef4332..f4baf553 100644
  		Engine::get_singleton()->set_editor_hint(true);
  		main_args.push_back("--editor");
  		if (!init_windowed) {
-@@ -1281,7 +1275,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -1281,7 +1273,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  	return OK;
  
  error:
@@ -126,7 +154,7 @@ index 37ef4332..f4baf553 100644
  	video_driver = "";
  	audio_driver = "";
  	tablet_driver = "";
-@@ -1290,9 +1283,11 @@ error:
+@@ -1290,9 +1281,11 @@ error:
  	args.clear();
  	main_args.clear();
  
@@ -138,7 +166,7 @@ index 37ef4332..f4baf553 100644
  
  	if (performance) {
  		memdelete(performance);
-@@ -1338,7 +1333,7 @@ error:
+@@ -1338,7 +1331,7 @@ error:
  
  Error Main::setup2(Thread::ID p_main_tid_override) {
  	// Print engine name and version
