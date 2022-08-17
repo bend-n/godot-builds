@@ -44,9 +44,7 @@ runs:
         context: .
         file: Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}:${{ env.version-name }}${{ env.tag }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}:${{ env.release-name }}
         build-args: |
           GODOT_VERSION=${{ env.version-name }}
           RELEASE_NAME=${{ env.release }}
-      env:
-        tag: ${{ env.release != 'stable' && format('.{0}', env.release) || '' }}

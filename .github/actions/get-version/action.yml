@@ -21,7 +21,14 @@ runs:
         echo 'print(status)' >> version.py
         echo "release=$(python version.py)" >> $GITHUB_ENV
         release=$(python version.py)
-        echo "#### ${version}.${release} :rocket:" >> $GITHUB_STEP_SUMMARY
+
+        release_name="$version"
+        [[ $release == 'stable' ]] || release_name+=".${release}"
+        echo "release-name=$release_name" >> $GITHUB_ENV
+
+        prerelease="true"
+        [[ $release == 'stable' ]] && prerelease="false"
+        echo "prerelease=${prerelease}" >> $GITHUB_ENV
       shell: bash
 
     - name: Post get version
