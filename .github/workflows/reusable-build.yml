@@ -79,9 +79,10 @@ jobs:
         target: [release, release_debug]
     steps:
       - name: Set up Java 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: 11
+          distribution: temurin
 
       - name: Compilation (armv7)
         uses: bend-n/godot-builds/.github/actions/build-godot@main
@@ -153,7 +154,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Set up Emscripten 3.1.10
-        uses: mymindstorm/setup-emsdk@v10
+        uses: mymindstorm/setup-emsdk@v11
         with:
           version: 3.1.10
 

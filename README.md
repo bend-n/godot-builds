@@ -60,7 +60,7 @@ build-windows:
         GAME_NAME: ${{ github.event.repository.name }}
 
     - name: Upload
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         name: windows
         path: build/windows
