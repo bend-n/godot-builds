@@ -1,5 +1,9 @@
 # godot builds
 
+[![version](https://img.shields.io/badge/3.5,%203.x-blue?logo=godot-engine&logoColor=white&label=godot&style=for-the-badge)](https://godotengine.org)
+[![aur](https://img.shields.io/aur/version/godot2d?color=informative&logo=archlinux&logoColor=white&style=for-the-badge)](https://aur.archlinux.org/packages/godot2d "Aur package")
+<a href='https://ko-fi.com/bendn' title='Buy me a coffee' target='_blank'><img height='28' src='https://ko-fi.com/img/githubbutton_sm.svg' alt='Buy me a coffee'> </a>
+
 Creates two packages.
 
 - `godot`: Docker images with the _normal_ godot build.
