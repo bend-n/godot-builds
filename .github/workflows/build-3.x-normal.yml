@@ -9,7 +9,8 @@ on:
       - main
     paths:
       - .github/normal*.py
-      - "**.yml"
+      - .github/workflows/build-3.x-normal.yml
+      - Dockerfile
 
 jobs:
   build:

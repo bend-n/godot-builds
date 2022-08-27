@@ -7,7 +7,8 @@ on:
       - main
     paths:
       - .github/2d*.py
-      - "**.yml"
+      - .github/workflows/build-3.5-2d.yml
+      - Dockerfile
 
 jobs:
   build:
