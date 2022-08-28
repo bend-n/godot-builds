@@ -45,6 +45,10 @@ runs:
         echo "::group::Patch godot"
         (cd repo && mv "${{ env.modules }}" ../godot/custom.py && mv patches ../godot)
         cd godot
-        for patch in patches/*; do git apply --ignore-whitespace "$patch" || echo "::error file={${patch}}::Go update your patch"; done
+        for patch in patches/*; do git apply --ignore-whitespace "$patch" || err="$patch"; done
+        if [[ -z $err ]]; then
+          echo "::error file={${err}}::Go update your patch"
+          exit 1
+        fi
         echo "::endgroup::"
       shell: bash
