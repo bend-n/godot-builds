@@ -1,4 +1,4 @@
-name: Build godot 3.5 stable (normal)
+name: Build godot 3.5.stable (2d)
 
 on:
   workflow_dispatch:
@@ -6,8 +6,8 @@ on:
     branches:
       - main
     paths:
-      - .github/normal*.py
-      - .github/workflows/build-3.5-normal.yml
+      - .github/2d*.py
+      - .github/workflows/build-3.5-2d.yml
       - Dockerfile
 
 jobs:
@@ -16,7 +16,4 @@ jobs:
     uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@main
     with:
       ref: 3.5-stable
-      name: godot
-      build-name: normal
-      modules-path: ./.github/normal-build-modules.py
     secrets: inherit
