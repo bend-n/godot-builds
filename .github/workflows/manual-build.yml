@@ -23,4 +23,5 @@ jobs:
       name: godot
       build-name: normal
       modules-path: ./.github/normal-build-modules.py
+      flags: ""
     secrets: inherit
