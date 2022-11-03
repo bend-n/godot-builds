@@ -42,7 +42,6 @@ runs:
       if: steps.clean.outputs.clean == 'true'
       run: |
         # Patch godot
-        echo "::group::Patch godot"
         (cd repo && mv "${{ env.modules }}" ../godot/custom.py && mv patches ../godot)
         cd godot
         for patch in patches/*; do git apply --ignore-whitespace "$patch" || err="$patch"; done
@@ -50,5 +49,4 @@ runs:
           echo "::error file={${err}}::Go update your patch"
           exit 1
         fi
-        echo "::endgroup::"
       shell: bash

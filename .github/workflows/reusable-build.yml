@@ -229,17 +229,16 @@ jobs:
       matrix:
         platform: [server, x11]
 
-    name: Build linux tools
+    name: Linux tools
     runs-on: ubuntu-20.04
     steps:
-      - name: Build editor
+      - name: Compilation
         uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           platform: ${{ matrix.platform }}
           target: release_debug
         env:
           tools: yes
-          flags: "" # override flags
 
       - name: Upload artifact
         uses: bend-n/godot-builds/.github/actions/upload-artifact@main
@@ -247,9 +246,9 @@ jobs:
           name: ${{ matrix.platform }}-tools-release
           path: godot/bin/*.64
 
-  build-image:
+  image:
     permissions: write-all
-    name: Build docker image
+    name: Docker image
     runs-on: ubuntu-latest
     needs: [tools, templates]
     steps:
