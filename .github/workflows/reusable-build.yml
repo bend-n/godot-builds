@@ -8,20 +8,16 @@ on:
         type: string
       flags:
         type: string
-        default: disable_3d=yes
-        required: false
+        required: true
       modules-path:
         type: string
-        default: ./.github/2d-build-modules.py
-        required: false
+        required: true
       name:
         type: string
-        default: godot-2d
-        required: false
+        required: true
       build-name:
         type: string
-        default: 2d
-        required: false
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -14,6 +14,10 @@ jobs:
     uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@main
     with:
       ref: ${{ inputs.ref }}
+      name: godot-2d
+      build-name: 2d
+      modules-path: ./.github/2d-build-modules.py
+      flags: disable_3d=yes
     secrets: inherit
   all-dimensions:
     name: Build ${{ inputs.ref }} (normal)
