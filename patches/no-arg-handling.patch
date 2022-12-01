@@ -1,18 +1,20 @@
 diff --git a/main/main.cpp b/main/main.cpp
-index 37ef4332..ecc30d7e 100644
+index 2d0843a331..2f46159c45 100644
 --- a/main/main.cpp
 +++ b/main/main.cpp
-@@ -128,7 +128,9 @@ static int audio_driver_idx = -1;
- static bool editor = false;
+@@ -156,10 +156,10 @@ static bool editor = false;
  static bool project_manager = false;
+ static bool cmdline_tool = false;
  static String locale;
-+#ifdef TOOLS_ENABLED
- static bool show_help = false;
-+#endif
+-static bool show_help = false;
  static bool auto_quit = false;
- static OS::ProcessID allow_focus_steal_pid = 0;
- static bool delta_sync_after_draw = false;
-@@ -239,6 +241,7 @@ void finalize_navigation_server() {
+ static OS::ProcessID editor_pid = 0;
+ #ifdef TOOLS_ENABLED
++static bool show_help = false;
+ static bool found_project = false;
+ static bool auto_build_solutions = false;
+ static String debug_server_uri;
+@@ -301,6 +301,7 @@ void finalize_theme_db() {
  #define MAIN_PRINT(m_txt)
  #endif
  
@@ -20,40 +22,42 @@ index 37ef4332..ecc30d7e 100644
  void Main::print_help(const char *p_binary) {
  	print_line(String(VERSION_NAME) + " v" + get_full_version_string() + " - " + String(VERSION_WEBSITE));
  	OS::get_singleton()->print("Free and open source software under the terms of the MIT license.\n");
-@@ -256,11 +259,9 @@ void Main::print_help(const char *p_binary) {
- 	OS::get_singleton()->print("\n");
+@@ -319,11 +320,9 @@ void Main::print_help(const char *p_binary) {
  
  	OS::get_singleton()->print("Run options:\n");
+ 	OS::get_singleton()->print("  --, ++                                       Separator for user-provided arguments. Following arguments are not used by the engine, but can be read from `OS.get_cmdline_user_args()`.\n");
 -#ifdef TOOLS_ENABLED
- 	OS::get_singleton()->print("  -e, --editor                     Start the editor instead of running the scene.\n");
- 	OS::get_singleton()->print("  -p, --project-manager            Start the project manager, even if a project is auto-detected.\n");
- 	OS::get_singleton()->print("  --debug-server <address>         Start the editor debug server (<IP>:<port>, e.g. 127.0.0.1:6007)\n");
+ 	OS::get_singleton()->print("  -e, --editor                                 Start the editor instead of running the scene.\n");
+ 	OS::get_singleton()->print("  -p, --project-manager                        Start the project manager, even if a project is auto-detected.\n");
+ 	OS::get_singleton()->print("  --debug-server <uri>                         Start the editor debug server (<protocol>://<host/IP>[:<port>], e.g. tcp://127.0.0.1:6007)\n");
 -#endif
- 	OS::get_singleton()->print("  -q, --quit                       Quit after the first iteration.\n");
- 	OS::get_singleton()->print("  -l, --language <locale>          Use a specific locale (<locale> being a two-letter code).\n");
- 	OS::get_singleton()->print("  --path <directory>               Path to a project (<directory> must contain a 'project.godot' file).\n");
-@@ -355,6 +356,7 @@ void Main::print_help(const char *p_binary) {
- 	OS::get_singleton()->print(").\n");
+ 	OS::get_singleton()->print("  --quit                                       Quit after the first iteration.\n");
+ 	OS::get_singleton()->print("  -l, --language <locale>                      Use a specific locale (<locale> being a two-letter code).\n");
+ 	OS::get_singleton()->print("  --path <directory>                           Path to a project (<directory> must contain a 'project.godot' file).\n");
+@@ -429,6 +428,7 @@ void Main::print_help(const char *p_binary) {
  #endif
+ 	OS::get_singleton()->print("\n");
  }
 +#endif
  
- /* Engine initialization
-  *
-@@ -493,13 +495,22 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ #ifdef TESTS_ENABLED
+ // The order is the same as in `Main::setup()`, only core and some editor types
+@@ -669,7 +669,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ 	List<String> args;
+ 	List<String> main_args;
+ 	List<String> user_args;
++#ifdef TOOLS_ENABLED
+ 	bool adding_user_args = false;
++#endif
+ 	List<String> platform_args = OS::get_singleton()->get_cmdline_platform_args();
+ 
+ 	// Add command line arguments.
+@@ -764,6 +766,19 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ 		}
  #endif
  
- 		List<String>::Element *N = I->next();
--
-+#ifdef TOOLS_ENABLED
- 		if (I->get() == "-h" || I->get() == "--help" || I->get() == "/?") { // display help
--
- 			show_help = true;
- 			exit_code = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
- 			goto error;
--
-+#else
-+		if (I->get() == "--main-pack") { // needed for JS bindings
++#ifndef TOOLS_ENABLED
++		if (I->get() == "--main-pack") {
 +			if (I->next()) {
 +				main_pack = I->next()->get();
 +				N = I->next()->next();
@@ -61,12 +65,14 @@ index 37ef4332..ecc30d7e 100644
 +				OS::get_singleton()->print("Missing path to main pack file, aborting.\n");
 +				goto error;
 +			};
-+#endif
-+#ifdef TOOLS_ENABLED
- 		} else if (I->get() == "--version") {
- 			print_line(get_full_version_string());
- 			exit_code = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
-@@ -737,7 +748,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
++		} else {
++			user_args.push_back(I->get());
++		}
++#else
+ 		if (adding_user_args) {
+ 			user_args.push_back(I->get());
+ 		} else if (I->get() == "-h" || I->get() == "--help" || I->get() == "/?") { // display help
+@@ -1028,7 +1043,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  				OS::get_singleton()->print("Missing render thread mode argument, aborting.\n");
  				goto error;
  			}
@@ -74,15 +80,15 @@ index 37ef4332..ecc30d7e 100644
  		} else if (I->get() == "-e" || I->get() == "--editor") { // starts editor
  
  			editor = true;
-@@ -773,7 +783,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
- 
- 			editor = true;
+@@ -1116,7 +1130,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ 			audio_driver = "Dummy";
+ 			display_driver = "headless";
  			main_args.push_back(I->get());
 -#endif
  		} else if (I->get() == "--path") { // set path of project to start or edit
  
  			if (I->next()) {
-@@ -806,9 +815,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -1148,9 +1161,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  			} else {
  				project_path = path;
  			}
@@ -92,39 +98,27 @@ index 37ef4332..ecc30d7e 100644
  		} else if (I->get() == "-b" || I->get() == "--breakpoints") { // add breakpoints
  
  			if (I->next()) {
-@@ -840,15 +847,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
- 				goto error;
- 			}
- 
--		} else if (I->get() == "--main-pack") {
--			if (I->next()) {
--				main_pack = I->next()->get();
--				N = I->next()->next();
--			} else {
--				OS::get_singleton()->print("Missing path to main pack file, aborting.\n");
--				goto error;
--			};
--
- 		} else if (I->get() == "-d" || I->get() == "--debug") {
- 			debug_mode = "local";
- 			OS::get_singleton()->_debug_stdout = true;
-@@ -897,6 +895,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
- 			OS::get_singleton()->disable_crash_handler();
- 		} else if (I->get() == "--skip-breakpoints") {
- 			skip_breakpoints = true;
-+#endif
+@@ -1293,18 +1304,15 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  		} else {
  			main_args.push_back(I->get());
  		}
-@@ -909,7 +908,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
- 		OS::get_singleton()->print("Error: Command line arguments implied opening both editor and project manager, which is not possible. Aborting.\n");
+-
++#endif
+ 		I = N;
+ 	}
+-
+ #ifdef TOOLS_ENABLED
+ 	if (editor && project_manager) {
+ 		OS::get_singleton()->print(
+ 				"Error: Command line arguments implied opening both editor and project manager, which is not possible. Aborting.\n");
  		goto error;
  	}
 -#endif
- 
+-
  	// Network file system needs to be configured before globals, since globals are based on the
  	// 'project.godot' file which will only be available through the network if this is enabled
-@@ -932,7 +930,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+ 	FileAccessNetwork::configure();
+@@ -1326,7 +1334,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  
  		FileAccess::make_default<FileAccessNetwork>(FileAccess::ACCESS_RESOURCES);
  	}
@@ -133,28 +127,7 @@ index 37ef4332..ecc30d7e 100644
  	if (globals->setup(project_path, main_pack, upwards, editor) == OK) {
  #ifdef TOOLS_ENABLED
  		found_project = true;
-@@ -1001,12 +999,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
- 	if (editor) {
- 		packed_data->set_disabled(true);
- 		globals->set_disable_feature_overrides(true);
--	}
--
--#endif
--
--#ifdef TOOLS_ENABLED
--	if (editor) {
- 		Engine::get_singleton()->set_editor_hint(true);
- 		main_args.push_back("--editor");
- 		if (!init_windowed) {
-@@ -1281,7 +1273,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
- 	return OK;
- 
- error:
--
- 	video_driver = "";
- 	audio_driver = "";
- 	tablet_driver = "";
-@@ -1290,9 +1281,11 @@ error:
+@@ -1886,9 +1894,11 @@ error:
  	args.clear();
  	main_args.clear();
  
@@ -164,14 +137,14 @@ index 37ef4332..ecc30d7e 100644
  	}
 +#endif
  
- 	if (performance) {
- 		memdelete(performance);
-@@ -1338,7 +1331,7 @@ error:
+ 	EngineDebugger::deinitialize();
+ 
+@@ -1935,7 +1945,7 @@ error:
  
  Error Main::setup2(Thread::ID p_main_tid_override) {
  	// Print engine name and version
 -	print_line(String(VERSION_NAME) + " v" + get_full_version_string() + " - " + String(VERSION_WEBSITE));
 +	print_line("v" + get_full_version_string());
  
- #if !defined(NO_THREADS)
- 	if (p_main_tid_override) {
+ 	engine->startup_benchmark_begin_measure("servers");
+ 

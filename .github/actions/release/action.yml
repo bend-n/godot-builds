@@ -29,12 +29,11 @@ runs:
     - name: Get editor
       uses: actions/download-artifact@v3
       with:
-        name: x11-tools-release
+        name: linuxbsd-tools-release
 
     - name: Compress
       run: |
-        mv godot.x11.opt.tools.64 ${{ env.fstart }}_x11.64
-        mv godot_server.x11.opt.tools.64 ${{ env.fstart }}_linux_headless.64
+        mv godot.linuxbsd.editor.x86_64 ${{ env.fstart }}_linuxbsd.64
         mv templates.tpz ${{ env.fstart }}_export_templates.tpz
       shell: bash
       env:
@@ -47,8 +46,7 @@ runs:
         tag_name: ${{ env.release-name }}
         files: |
           ${{ env.fstart }}_export_templates.tpz
-          ${{ env.fstart }}_x11.64
-          ${{ env.fstart }}_linux_headless.64
+          ${{ env.fstart }}_linuxbsd.64
         token: ${{ inputs.github-token }}
         prerelease: ${{ env.prerelease }}
       env:

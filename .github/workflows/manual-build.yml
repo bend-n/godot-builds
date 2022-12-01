@@ -17,7 +17,7 @@ jobs:
       name: godot-2d
       build-name: 2d
       modules-path: ./.github/2d-build-modules.py
-      flags: disable_3d=yes
+      flags: ""
     secrets: inherit
   all-dimensions:
     name: Build ${{ inputs.ref }} (normal)

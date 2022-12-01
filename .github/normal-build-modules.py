@@ -1,0 +1,5 @@
+debug_symbols = "no"
+optimize = "size"
+lto = "auto"
+production = "yes"
+deprecated = "no"
