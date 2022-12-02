@@ -2,10 +2,6 @@ name: Build godot
 description: Builds godot with a certain version and certain flags
 
 inputs:
-  url:
-    description: Godot git url
-    default: https://github.com/godotengine/godot
-    required: true
   platform:
     description: Platform to build for
     required: true

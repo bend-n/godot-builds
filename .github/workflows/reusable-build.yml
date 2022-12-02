@@ -28,7 +28,6 @@ env:
   ref: ${{ inputs.ref }}
   flags: ${{ inputs.flags }}
   modules: ${{ inputs.modules-path }}
-  tools: no
 
 jobs:
   linux:
@@ -195,39 +194,55 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
 
+      - name: List all downloaded files
+        run: ls -R
+
+      - name: Getdot
+        uses: actions/checkout@v3
+        with:
+          repository: godotengine/godot
+          ref: ${{ inputs.ref }}
+          path: godot-repo
+
       - name: Prepare files
         run: |
-          mkdir -vp ${tmps}
-          git clone --depth 1 'https://github.com/godotengine/godot' -b 3.x godot-repo
-          ls -R
+          rel="template_release"
+          bug="template_debug"
+          mkdir -vp "$tmps"
           echo "Preparing linux"
-          mv linux/godot.linuxbsd.opt.64 ${tmps}/linux_linuxbsd_64_release
-          mv linux/godot.linuxbsd.opt.debug.64 ${tmps}/linux_linuxbsd_64_debug
+          linux="godot.linuxbsd"
+          mv "linux/$linux.$bug.x86_64" "$tmps/linux_debug.x86_64"
+          mv "linux/$linux.$rel.x86_64" "$tmps/linux_release.x86_64"
 
           echo "Preparing windows"
-          mv windows/godot.windows.opt.64.exe ${tmps}/windows_64_release.exe
-          mv windows/godot.windows.opt.debug.64.exe ${tmps}/windows_64_debug.exe
+          windows="godot.windows"
+          mv "windows/$windows.$bug.x86_64.console.exe" "$tmps/windows_debug_x86_64_console.exe"
+          mv "windows/$windows.$bug.x86_64.exe" "$tmps/windows_debug_x86_64.exe"
+          mv "windows/$windows.$rel.x86_64.console.exe" "$tmps/windows_release_x86_64_console.exe"
+          mv "windows/$windows.$rel.x86_64.exe" "$tmps/windows_release_x86_64.exe"
 
           echo "Preparing android"
-          mv android/android_debug.apk ${tmps}/android_debug.apk
-          mv android/android_release.apk ${tmps}/android_release.apk
+          mv "android/android_debug.apk" "$tmps/android_debug.apk"
+          mv "android/android_release.apk" "$tmps/android_release.apk"
 
           echo "Preparing macos"
-          cp -r godot-repo/misc/dist/osx_template.app .
-          mkdir -p osx_template.app/Contents/MacOS
-          cp macos/godot.macos.opt.universal osx_template.app/Contents/MacOS/godot_osx_release.64
-          cp macos/godot.macos.opt.debug.universal osx_template.app/Contents/MacOS/godot_osx_debug.64
-          chmod +x osx_template.app/Contents/MacOS/godot_osx_*.64
-          zip -q -9 -r ${tmps}/osx.zip osx_template.app
+          mac="godot.macos.opt"
+          cp -r "godot-repo/misc/dist/macos_template.app" "."
+          mkdir -p "macos_template.app/Contents/MacOS"
+          cp "macos/$mac.universal" "macos_template.app/Contents/MacOS/godot_macos_release.universal"
+          cp "macos/$mac.debug.universal" "macos_template.app/Contents/MacOS/godot_macos_debug.universal"
+          chmod +x macos_template.app/Contents/MacOS/godot_macos_*.universal
+          zip -q -9 -r "$tmps/macos.zip" "macos_template.app"
 
           echo "Preparing web"
-          mv web/godot.web.opt.zip ${tmps}/web_release.zip
-          mv web/godot.web.opt.debug.zip ${tmps}/web_debug.zip
-          mv web/godot.web.opt.dlink.zip ${tmps}/web_dlink_release.zip
-          mv web/godot.web.opt.debug.dlink.zip ${tmps}/web_dlink_debug.zip
+          web="godot.web"
+          mv "web/$web.$rel.wasm32.zip" "$tmps/web_release.zip"
+          mv "web/$web.$bug.wasm32.zip" "$tmps/web_debug.zip"
+          mv "web/$web.$rel.wasm32.dlink.zip" "$tmps/web_dlink_release.zip"
+          mv "web/$web.$bug.wasm32.dlink.zip" "$tmps/web_dlink_debug.zip"
 
       - name: Prepare bundle
-        run: "cd ${tmps} && zip -q -9 -r templates.tpz ./*"
+        run: cd "${tmps}" && zip -qr9 templates.tpz ./*
 
       - name: Upload artifact
         uses: bend-n/godot-builds/.github/actions/upload-artifact@main
@@ -235,7 +250,7 @@ jobs:
           path: ${{ env.tmps }}/templates.tpz
 
   editor:
-    name: Linux tools
+    name: Linux editor
     runs-on: ubuntu-20.04
     steps:
       - name: Compilation
