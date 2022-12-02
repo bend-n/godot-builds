@@ -42,6 +42,12 @@ runs:
       run: pip install scons
       shell: bash
 
+    - name: Download more ram
+      if: runner.os == 'Linux'
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 10
+
     - name: Build Godot
       run: |
         echo ::group::Compilation
