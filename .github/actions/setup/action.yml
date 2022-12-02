@@ -16,8 +16,8 @@ runs:
     - name: Check if clean
       id: clean
       run: |
-        if [[ -d godot ]]; then echo "::set-output name=clean::false";
-        else echo "::set-output name=clean::true"; fi
+        if [[ -d godot ]]; then echo "clean=false" >> $GITHUB_OUTPUT;
+        else echo "clean=true" >> $GITHUB_OUTPUT; fi
       shell: bash
 
     - uses: actions/checkout@v3
