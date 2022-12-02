@@ -21,19 +21,14 @@ runs:
       with:
         name: templates
 
-    - name: Get headless
-      uses: actions/download-artifact@v3
-      with:
-        name: server-tools-release
-
     - name: Get editor
       uses: actions/download-artifact@v3
       with:
-        name: linuxbsd-tools-release
+        name: linuxbsd-editor-release
 
     - name: Compress
       run: |
-        mv godot.linuxbsd.editor.x86_64 ${{ env.fstart }}_linuxbsd.64
+        mv godot.linuxbsd.editor.x86_64 ${{ env.fstart }}_linux.x86_64
         mv templates.tpz ${{ env.fstart }}_export_templates.tpz
       shell: bash
       env:
@@ -46,7 +41,7 @@ runs:
         tag_name: ${{ env.release-name }}
         files: |
           ${{ env.fstart }}_export_templates.tpz
-          ${{ env.fstart }}_linuxbsd.64
+          ${{ env.fstart }}_linux.x86_64
         token: ${{ inputs.github-token }}
         prerelease: ${{ env.prerelease }}
       env:

@@ -2,10 +2,6 @@ name: "Setup"
 description: "Setup the environment for building"
 
 inputs:
-  repo:
-    description: Godot github owner/repo
-    default: godotengine/godot
-    required: true
   ref:
     description: Which ref to build
     required: true
@@ -23,7 +19,7 @@ runs:
     - uses: actions/checkout@v3
       if: steps.clean.outputs.clean == 'true'
       with:
-        repository: ${{ inputs.repo }}
+        repository: godotengine/godot
         ref: ${{ inputs.ref }}
         path: "godot"
 
