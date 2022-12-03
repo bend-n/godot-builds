@@ -1,0 +1,21 @@
+name: Manually build godot normal
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        type: string
+        description: which ref to build
+        required: true
+
+jobs:
+  all-dimensions:
+    name: Build ${{ inputs.ref }}
+    uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@main
+    with:
+      ref: ${{ inputs.ref }}
+      name: godot
+      build-name: bendn
+      modules-path: ./.github/normal-build-modules.py
+      flags: ""
+    secrets: inherit

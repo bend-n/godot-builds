@@ -1,0 +1,21 @@
+name: Manually build godot 2D
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        type: string
+        description: which ref to build
+        required: true
+
+jobs:
+  two-dimensions:
+    name: Build ${{ inputs.ref }}
+    uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@main
+    with:
+      ref: ${{ inputs.ref }}
+      name: godot-2d
+      build-name: bendn.2D
+      modules-path: ./.github/2d-build-modules.py
+      flags: disable_3d=yes
+    secrets: inherit
