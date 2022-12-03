@@ -4,11 +4,12 @@ on:
   workflow_call:
     inputs:
       ref:
-        required: true
         type: string
+        required: true
       flags:
         type: string
-        required: true
+        default: ""
+        required: false
       modules-path:
         type: string
         required: true
