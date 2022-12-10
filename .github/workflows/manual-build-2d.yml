@@ -17,5 +17,5 @@ jobs:
       name: godot-2d
       build-name: bendn.2D
       modules-path: ./.github/2d-build-modules.py
-      flags: disable_3d=yes
+      flags: ""
     secrets: inherit
