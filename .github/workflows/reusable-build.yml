@@ -160,7 +160,7 @@ jobs:
     strategy:
       matrix:
         target: [template_release, template_debug]
-        #flags: [dlink_enabled=yes, ""]
+        flags: [dlink_enabled=yes, ""]
 
     name: JS temps
     runs-on: ubuntu-20.04
@@ -177,7 +177,7 @@ jobs:
         uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           target: ${{ matrix.target }}
-          flags: ${{ env.flags }} #${{ matrix.flags }}
+          flags: ${{ env.flags }} ${{ matrix.flags }}
           platform: web
 
       - name: Upload artifact
@@ -239,8 +239,8 @@ jobs:
           web="godot.web"
           mv "web/$web.$rel.wasm32.zip" "$tmps/web_release.zip"
           mv "web/$web.$bug.wasm32.zip" "$tmps/web_debug.zip"
-          # mv "web/$web.$rel.wasm32.dlink.zip" "$tmps/web_dlink_release.zip"
-          # mv "web/$web.$bug.wasm32.dlink.zip" "$tmps/web_dlink_debug.zip"
+          mv "web/$web.$rel.wasm32.dlink.zip" "$tmps/web_dlink_release.zip"
+          mv "web/$web.$bug.wasm32.dlink.zip" "$tmps/web_dlink_debug.zip"
 
       - name: Prepare bundle
         run: cd "${tmps}" && zip -qr9 templates.tpz ./*
