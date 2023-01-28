@@ -8,7 +8,7 @@ on:
         description: which ref to build
         required: true
   schedule:
-    - cron: '30 21 * * *'
+    - cron: '30 20 * * *'
 
 jobs:
   all-dimensions:
