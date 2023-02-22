@@ -12,7 +12,7 @@ Creates two packages.
 
 ## How to use
 
-For a full example, see this [template](https://github.com/bend-n/godot-template/blob/3d79cf6cc3e25317763ad4100e2a8692b0c2644e/.github/workflows/export.yml).
+For a full example, see this [template](https://github.com/bend-n/godot-template/blob/9c9e2b02ddf9f88bff872dcd2695363d09485bc4/.github/workflows/export.yml).
 
 <details open>
 <summary>With helpers (recomended)</summary>
@@ -21,13 +21,12 @@ For a full example, see this [template](https://github.com/bend-n/godot-template
 build-windows:
   runs-on: ubuntu-latest
   container:
-    image: ghcr.io/bend-n/godot-2d:4.0.beta
+    image: ghcr.io/bend-n/godot-2d:4.0.rc
   name: Build windows
   steps:
     - name: Build (Windows)
       uses: bend-n/godot-actions/.github/actions/export-windows@main
       env:
-        GODOT_VERSION: 4.0
         NAME: ${{ github.event.repository.name }}
 ```
 
@@ -43,7 +42,7 @@ build-windows:
 build-windows:
   runs-on: ubuntu-latest
   container:
-    image: ghcr.io/bend-n/godot-2d:4.0.beta
+    image: ghcr.io/bend-n/godot-2d:4.0.rc
   name: Build windows
   steps:
     - name: Checkout
@@ -51,7 +50,7 @@ build-windows:
 
     - name: Setup godot
       run: |
-        RELEASE=stable; GODOT_VERSION=4.0;
+        RELEASE=stable; GODOT_VERSION=4.0.rc;
         mkdir -v -p ~/.local/share/godot/templates
         mv /root/.local/share/godot/templates/${GODOT_VERSION}.${RELEASE} ~/.local/share/godot/templates/${GODOT_VERSION}.${RELEASE}
 
