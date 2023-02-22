@@ -133,4 +133,4 @@ editors/3d_gizmos/gizmo_colors/joint_body_a = Color( 0.6, 0.8, 1, 1 )
 editors/3d_gizmos/gizmo_colors/joint_body_b = Color( 0.6, 0.9, 1, 1 )
 text_editor/help/sort_functions_alphabetically = true
 text_editor/highlighting/gdscript/function_definition_color = Color( 0.4, 0.9, 1, 1 )
-text_editor/highlighting/gdscript/node_path_color = Color( 0.39, 0.76, 0.35, 1 ) 
+text_editor/highlighting/gdscript/node_path_color = Color( 0.39, 0.76, 0.35, 1 )
