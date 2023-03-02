@@ -21,7 +21,7 @@ For a full example, see this [template](https://github.com/bend-n/godot-template
 build-windows:
   runs-on: ubuntu-latest
   container:
-    image: ghcr.io/bend-n/godot-2d:4.0.rc
+    image: ghcr.io/bend-n/godot-2d:4.0
   name: Build windows
   steps:
     - name: Build (Windows)
@@ -42,7 +42,7 @@ build-windows:
 build-windows:
   runs-on: ubuntu-latest
   container:
-    image: ghcr.io/bend-n/godot-2d:4.0.rc
+    image: ghcr.io/bend-n/godot-2d:4.0
   name: Build windows
   steps:
     - name: Checkout
