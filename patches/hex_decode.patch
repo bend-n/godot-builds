@@ -1,0 +1,168 @@
+From 0742ae2f2c3aea760f0dfd48379e19ffe81a9c2c Mon Sep 17 00:00:00 2001
+From: bendn <bend.n@outlook.com>
+Date: Mon, 6 Mar 2023 10:17:33 +0700
+Subject: [PATCH] add `hex_decode()` to `String`
+
+---
+ core/string/ustring.cpp                       | 29 +++++++++++++++++++
+ core/string/ustring.h                         |  2 ++
+ core/variant/variant_call.cpp                 |  1 +
+ doc/classes/String.xml                        | 18 ++++++++++++
+ doc/classes/StringName.xml                    | 18 ++++++++++++
+ .../GodotSharp/Core/StringExtensions.cs       | 20 +++++++++++++
+ 6 files changed, 88 insertions(+)
+
+diff --git a/core/string/ustring.cpp b/core/string/ustring.cpp
+index 1b3b070592b2..8381a176ce8a 100644
+--- a/core/string/ustring.cpp
++++ b/core/string/ustring.cpp
+@@ -1644,6 +1644,35 @@ String String::hex_encode_buffer(const uint8_t *p_buffer, int p_len) {
+ 	return ret;
+ }
+ 
++Vector<uint8_t> String::hex_decode() const {
++	ERR_FAIL_COND_V_MSG(length() % 2 != 0, Vector<uint8_t>(), "Hexadecimal string of uneven length.");
++
++#define HEX_TO_BYTE(m_output, m_index)                                                                                   \
++	uint8_t m_output;                                                                                                    \
++	c = operator[](m_index);                                                                                             \
++	if (is_digit(c)) {                                                                                                   \
++		m_output = c - '0';                                                                                              \
++	} else if (c >= 'a' && c <= 'f') {                                                                                   \
++		m_output = c - 'a' + 10;                                                                                         \
++	} else if (c >= 'A' && c <= 'F') {                                                                                   \
++		m_output = c - 'A' + 10;                                                                                         \
++	} else {                                                                                                             \
++		ERR_FAIL_V_MSG(Vector<uint8_t>(), "Invalid hexadecimal character \"" + chr(c) + "\" at index " + m_index + "."); \
++	}
++
++	Vector<uint8_t> out;
++	int len = length() / 2;
++	out.resize(len);
++	for (int i = 0; i < len; i++) {
++		char32_t c;
++		HEX_TO_BYTE(first, i * 2);
++		HEX_TO_BYTE(second, i * 2 + 1);
++		out.write[i] = first * 16 + second;
++	}
++	return out;
++#undef HEX_TO_BYTE
++}
++
+ void String::print_unicode_error(const String &p_message, bool p_critical) const {
+ 	if (p_critical) {
+ 		print_error(vformat("Unicode parsing error, some characters were replaced with spaces: %s", p_message));
+diff --git a/core/string/ustring.h b/core/string/ustring.h
+index 1582504c57d4..1b36608d353e 100644
+--- a/core/string/ustring.h
++++ b/core/string/ustring.h
+@@ -321,6 +321,8 @@ class String {
+ 	static String chr(char32_t p_char);
+ 	static String md5(const uint8_t *p_md5);
+ 	static String hex_encode_buffer(const uint8_t *p_buffer, int p_len);
++	Vector<uint8_t> hex_decode() const;
++
+ 	bool is_numeric() const;
+ 
+ 	double to_float() const;
+diff --git a/core/variant/variant_call.cpp b/core/variant/variant_call.cpp
+index 0c0c8f657a26..7e5830d2ae7c 100644
+--- a/core/variant/variant_call.cpp
++++ b/core/variant/variant_call.cpp
+@@ -1721,6 +1721,7 @@ static void _register_variant_builtin_methods() {
+ 	bind_string_method(to_utf8_buffer, sarray(), varray());
+ 	bind_string_method(to_utf16_buffer, sarray(), varray());
+ 	bind_string_method(to_utf32_buffer, sarray(), varray());
++	bind_string_method(hex_decode, sarray(), varray());
+ 
+ 	bind_static_method(String, num_scientific, sarray("number"), varray());
+ 	bind_static_method(String, num, sarray("number", "decimals"), varray(-1));
+diff --git a/doc/classes/String.xml b/doc/classes/String.xml
+index d629a31bca1b..f909ccdba938 100644
+--- a/doc/classes/String.xml
++++ b/doc/classes/String.xml
+@@ -313,6 +313,24 @@
+ 				[b]Note:[/b] Strings with equal hash values are [i]not[/i] guaranteed to be the same, as a result of hash collisions. On the countrary, strings with different hash values are guaranteed to be different.
+ 			</description>
+ 		</method>
++		<method name="hex_decode" qualifiers="const">
++			<return type="PackedByteArray" />
++			<description>
++				Decodes a hexadecimal string as a [PackedByteArray].
++				[codeblocks]
++				[gdscript]
++				var text = "hello world"
++				var encoded = text.to_utf8_buffer().hex_encode()
++				print(buf.hex_decode().get_string_from_utf8())
++				[/gdscript]
++				[csharp]
++				var text = "hello world";
++				var encoded = text.ToUtf8Buffer().HexEncode();
++				GD.Print(buf.HexDecode().GetStringFromUtf8());
++				[/csharp]
++				[/codeblocks]
++			</description>
++		</method>
+ 		<method name="hex_to_int" qualifiers="const">
+ 			<return type="int" />
+ 			<description>
+diff --git a/doc/classes/StringName.xml b/doc/classes/StringName.xml
+index 192cb1a6c2ab..57172b897b5f 100644
+--- a/doc/classes/StringName.xml
++++ b/doc/classes/StringName.xml
+@@ -296,6 +296,24 @@
+ 				[b]Note:[/b] Strings with equal hash values are [i]not[/i] guaranteed to be the same, as a result of hash collisions. On the countrary, strings with different hash values are guaranteed to be different.
+ 			</description>
+ 		</method>
++		<method name="hex_decode" qualifiers="const">
++			<return type="PackedByteArray" />
++			<description>
++				Decodes a hexadecimal string as a [PackedByteArray].
++				[codeblocks]
++				[gdscript]
++				var text = "hello world"
++				var encoded = text.to_utf8_buffer().hex_encode()
++				print(buf.hex_decode().get_string_from_utf8())
++				[/gdscript]
++				[csharp]
++				var text = "hello world";
++				var encoded = text.ToUtf8Buffer().HexEncode();
++				GD.Print(buf.HexDecode().GetStringFromUtf8());
++				[/csharp]
++				[/codeblocks]
++			</description>
++		</method>
+ 		<method name="hex_to_int" qualifiers="const">
+ 			<return type="int" />
+ 			<description>
+diff --git a/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs b/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs
+index df67e075aca3..e67e18b27613 100644
+--- a/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs
++++ b/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs
+@@ -728,6 +728,26 @@ public static uint Hash(this string instance)
+             return hash;
+         }
+ 
++        /// <summary>
++        /// Decodes a hexadecimal string.
++        /// </summary>
++        /// <param name="instance">The hexadecimal string.</param>
++        /// <returns>The byte array representation of this string.</returns>
++        public static byte[] HexDecode(this string instance)
++        {
++            if (instance.Length % 2 != 0)
++            {
++                throw new ArgumentException("Hexadecimal string of uneven length.", nameof(instance));
++            }
++            int len = instance.Length / 2;
++            byte[] ret = new byte[len];
++            for (int i = 0; i < len; i++)
++            {
++                ret[i] = (byte)int.Parse(instance.Substring(i * 2, 2), NumberStyles.HexNumber);
++            }
++            return ret;
++        }
++
+         /// <summary>
+         /// Returns a hexadecimal representation of this byte as a string.
+         /// </summary>
