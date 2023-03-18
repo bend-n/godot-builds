@@ -11,7 +11,7 @@ on:
 jobs:
   two-dimensions:
     name: Build ${{ inputs.ref }}
-    uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@main
+    uses: bend-n/godot-builds/.github/workflows/reusable-build.yml@3.x
     with:
       ref: ${{ inputs.ref }}
       name: godot-2d

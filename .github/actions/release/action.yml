@@ -14,7 +14,7 @@ runs:
   using: "composite"
   steps:
     - name: Get version
-      uses: bend-n/godot-builds/.github/actions/get-version@main
+      uses: bend-n/godot-builds/.github/actions/get-version@3.x
 
     - name: Get templates
       uses: actions/download-artifact@v3

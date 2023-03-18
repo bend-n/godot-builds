@@ -5,7 +5,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup
-      uses: bend-n/godot-builds/.github/actions/setup@main
+      uses: bend-n/godot-builds/.github/actions/setup@3.x
       with:
         ref: ${{ env.ref }}
 
