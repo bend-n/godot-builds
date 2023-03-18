@@ -35,7 +35,7 @@ runs:
       shell: bash
 
     - name: Setup scons
-      run: pip install scons
+      run: pip install --force-reinstall -v "scons==4.4.0"
       shell: bash
 
     - name: Download more ram
