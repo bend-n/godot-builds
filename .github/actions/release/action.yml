@@ -28,7 +28,7 @@ runs:
 
     - name: Compress
       run: |
-        mv godot.linuxbsd.editor.x86_64 ${{ env.fstart }}_linux.x86_64
+        mv godot.x11.opt.tools.64 ${{ env.fstart }}_linux.x86_64
         mv templates.tpz ${{ env.fstart }}_export_templates.tpz
       shell: bash
       env:
