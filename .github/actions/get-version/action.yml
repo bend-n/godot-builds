@@ -12,7 +12,12 @@ runs:
     - name: Get version
       run: |
         cd godot
-        echo 'print(f"{major}.{minor}")' >> version.py
+        # i could not get heredocs to work here
+        echo 'if patch:' >> version.py
+        echo '  print(f"{major}.{minor}.{patch}")' >> version.py
+        echo 'else:' >> version.py
+        echo '  print(f"{major}.{minor}")' >> version.py
+
         echo "version-name=$(python version.py)" >> $GITHUB_ENV
         version=$(python version.py)
 
