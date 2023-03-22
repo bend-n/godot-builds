@@ -26,9 +26,15 @@ runs:
       with:
         name: linuxbsd-editor-release
 
+    - name: Get headless
+      uses: actions/download-artifact@v3
+      with:
+        name: server-editor-release
+
     - name: Compress
       run: |
         mv godot.x11.opt.tools.64 ${{ env.fstart }}_linux.x86_64
+        mv godot_server.x11.opt.tools.64 ${{ env.fstart }}_linux_headless.64
         mv templates.tpz ${{ env.fstart }}_export_templates.tpz
       shell: bash
       env:
@@ -42,7 +48,9 @@ runs:
         files: |
           ${{ env.fstart }}_export_templates.tpz
           ${{ env.fstart }}_linux.x86_64
+          ${{ env.fstart }}_linux_headless.64
         token: ${{ inputs.github-token }}
         prerelease: ${{ env.prerelease }}
+        fail_on_unmatched_files: true
       env:
         fstart: ${{ inputs.name }}_v${{ env.version-name }}

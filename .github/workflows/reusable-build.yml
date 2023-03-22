@@ -249,21 +249,26 @@ jobs:
           path: ${{ env.tmps }}/templates.tpz
 
   editor:
+    strategy:
+      matrix:
+        platform: [server, linuxbsd]
+
     name: Linux editor
     runs-on: ubuntu-20.04
     steps:
       - name: Compilation
         uses: bend-n/godot-builds/.github/actions/build-godot@3.x
         with:
-          platform: linuxbsd
+          platform: ${{ matrix.platform }}
           target: release_debug
         env:
           tools: yes
+          flags: "" # override flags
 
       - name: Upload artifact
         uses: bend-n/godot-builds/.github/actions/upload-artifact@3.x
         with:
-          name: linuxbsd-editor-release
+          name: ${{ matrix.platform }}-editor-release
           path: godot/bin/*.64
 
   image:
