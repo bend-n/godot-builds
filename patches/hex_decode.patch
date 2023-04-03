@@ -1,19 +1,5 @@
-From 0742ae2f2c3aea760f0dfd48379e19ffe81a9c2c Mon Sep 17 00:00:00 2001
-From: bendn <bend.n@outlook.com>
-Date: Mon, 6 Mar 2023 10:17:33 +0700
-Subject: [PATCH] add `hex_decode()` to `String`
-
----
- core/string/ustring.cpp                       | 29 +++++++++++++++++++
- core/string/ustring.h                         |  2 ++
- core/variant/variant_call.cpp                 |  1 +
- doc/classes/String.xml                        | 18 ++++++++++++
- doc/classes/StringName.xml                    | 18 ++++++++++++
- .../GodotSharp/Core/StringExtensions.cs       | 20 +++++++++++++
- 6 files changed, 88 insertions(+)
-
 diff --git a/core/string/ustring.cpp b/core/string/ustring.cpp
-index 1b3b070592b2..8381a176ce8a 100644
+index 6a59942a56..773445edb6 100644
 --- a/core/string/ustring.cpp
 +++ b/core/string/ustring.cpp
 @@ -1644,6 +1644,35 @@ String String::hex_encode_buffer(const uint8_t *p_buffer, int p_len) {
@@ -53,10 +39,10 @@ index 1b3b070592b2..8381a176ce8a 100644
  	if (p_critical) {
  		print_error(vformat("Unicode parsing error, some characters were replaced with spaces: %s", p_message));
 diff --git a/core/string/ustring.h b/core/string/ustring.h
-index 1582504c57d4..1b36608d353e 100644
+index 28e3af92c5..90034b1b07 100644
 --- a/core/string/ustring.h
 +++ b/core/string/ustring.h
-@@ -321,6 +321,8 @@ class String {
+@@ -321,6 +321,8 @@ public:
  	static String chr(char32_t p_char);
  	static String md5(const uint8_t *p_md5);
  	static String hex_encode_buffer(const uint8_t *p_buffer, int p_len);
@@ -66,19 +52,19 @@ index 1582504c57d4..1b36608d353e 100644
  
  	double to_float() const;
 diff --git a/core/variant/variant_call.cpp b/core/variant/variant_call.cpp
-index 0c0c8f657a26..7e5830d2ae7c 100644
+index ae15158836..13e9da37f2 100644
 --- a/core/variant/variant_call.cpp
 +++ b/core/variant/variant_call.cpp
-@@ -1721,6 +1721,7 @@ static void _register_variant_builtin_methods() {
+@@ -1734,6 +1734,7 @@ static void _register_variant_builtin_methods() {
  	bind_string_method(to_utf8_buffer, sarray(), varray());
  	bind_string_method(to_utf16_buffer, sarray(), varray());
  	bind_string_method(to_utf32_buffer, sarray(), varray());
 +	bind_string_method(hex_decode, sarray(), varray());
+ 	bind_string_method(to_wchar_buffer, sarray(), varray());
  
  	bind_static_method(String, num_scientific, sarray("number"), varray());
- 	bind_static_method(String, num, sarray("number", "decimals"), varray(-1));
 diff --git a/doc/classes/String.xml b/doc/classes/String.xml
-index d629a31bca1b..f909ccdba938 100644
+index 1f4ffa417d..854bb2b2f8 100644
 --- a/doc/classes/String.xml
 +++ b/doc/classes/String.xml
 @@ -313,6 +313,24 @@
@@ -107,7 +93,7 @@ index d629a31bca1b..f909ccdba938 100644
  			<return type="int" />
  			<description>
 diff --git a/doc/classes/StringName.xml b/doc/classes/StringName.xml
-index 192cb1a6c2ab..57172b897b5f 100644
+index 2140c53e20..c41fcac033 100644
 --- a/doc/classes/StringName.xml
 +++ b/doc/classes/StringName.xml
 @@ -296,6 +296,24 @@
@@ -136,10 +122,10 @@ index 192cb1a6c2ab..57172b897b5f 100644
  			<return type="int" />
  			<description>
 diff --git a/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs b/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs
-index df67e075aca3..e67e18b27613 100644
+index df67e075ac..d53bb9f536 100644
 --- a/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs
 +++ b/modules/mono/glue/GodotSharp/GodotSharp/Core/StringExtensions.cs
-@@ -728,6 +728,26 @@ public static uint Hash(this string instance)
+@@ -728,6 +728,26 @@ namespace Godot
              return hash;
          }
  
@@ -158,7 +144,7 @@ index df67e075aca3..e67e18b27613 100644
 +            byte[] ret = new byte[len];
 +            for (int i = 0; i < len; i++)
 +            {
-+                ret[i] = (byte)int.Parse(instance.Substring(i * 2, 2), NumberStyles.HexNumber);
++                ret[i] = (byte)int.Parse(instance.AsSpan(i * 2, 2), NumberStyles.AllowHexSpecifier);
 +            }
 +            return ret;
 +        }
