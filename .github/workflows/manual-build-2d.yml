@@ -7,7 +7,11 @@ on:
         type: string
         description: which ref to build
         required: true
-
+      release:
+        type: string
+        default: "yes"
+        description: to make a release
+        
 jobs:
   two-dimensions:
     name: Build ${{ inputs.ref }}
@@ -18,4 +22,5 @@ jobs:
       build-name: bendn.2D
       modules-path: ./.github/2d-build-modules.py
       flags: ""
+      make-release: ${{ inputs.release }}
     secrets: inherit

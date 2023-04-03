@@ -7,6 +7,10 @@ on:
         type: string
         description: which ref to build
         required: true
+      release:
+        type: string
+        default: "yes"
+        description: to make a release
   # turn on when the godot5 is in dev
   # schedule:
   #   - cron: '30 20 * * *'
@@ -21,4 +25,5 @@ jobs:
       build-name: bendn
       modules-path: ./.github/normal-build-modules.py
       flags: ""
+      make-release: ${{ inputs.release }}
     secrets: inherit
