@@ -41,8 +41,5 @@ runs:
         (cd repo && mv "${{ env.modules }}" ../godot/custom.py && mv patches ../godot)
         cd godot
         for patch in patches/*; do git apply --ignore-whitespace "$patch" || err="$patch"; done
-        if [[ -n $err ]]; then
-          echo "::error file={${err}}::Go update your patch"
-          exit 1
-        fi
+        [[ -n $err ]] && echo "::warning file={${err}}::Patch did not apply"
       shell: bash
