@@ -1,6 +1,6 @@
-From 5d10dc5da2508530a38c66d4aa1ec234327a3b34 Mon Sep 17 00:00:00 2001
+From ff6378a52bc81692d4f3552fbbe5ad628ef1ab20 Mon Sep 17 00:00:00 2001
 From: Ellen Poe <ellen.h.poe@gmail.com>
-Date: Sun, 12 Feb 2023 07:34:55 -0800
+Date: Mon, 10 Apr 2023 13:38:10 +0700
 Subject: [PATCH] Fix AudioStreamGenerator stopping playback after a buffer
  underrun
 
@@ -21,3 +21,4 @@ index 0344bf322d68..5e71d7af0550 100644
  			// We know we have at least the size of our lookahead buffer for fade-out purposes.
  
  			float fadeout_base = 0.94;
+
