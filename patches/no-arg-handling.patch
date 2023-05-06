@@ -1,20 +1,21 @@
 diff --git a/main/main.cpp b/main/main.cpp
-index 2326e519bf..dddcae0be2 100644
+index 5e0187cc7f..f57985fb32 100644
 --- a/main/main.cpp
 +++ b/main/main.cpp
-@@ -156,10 +156,10 @@ static bool editor = false;
+@@ -166,10 +166,10 @@ static bool editor = false;
  static bool project_manager = false;
  static bool cmdline_tool = false;
  static String locale;
 -static bool show_help = false;
- static bool auto_quit = false;
+-static uint64_t quit_after = 0;
  static OS::ProcessID editor_pid = 0;
  #ifdef TOOLS_ENABLED
++static uint64_t quit_after = 0;
 +static bool show_help = false;
  static bool found_project = false;
  static bool auto_build_solutions = false;
  static String debug_server_uri;
-@@ -302,6 +302,7 @@ void finalize_theme_db() {
+@@ -331,6 +331,7 @@ void finalize_theme_db() {
  #define MAIN_PRINT(m_txt)
  #endif
  
@@ -22,7 +23,7 @@ index 2326e519bf..dddcae0be2 100644
  void Main::print_help(const char *p_binary) {
  	print_line(String(VERSION_NAME) + " v" + get_full_version_string() + " - " + String(VERSION_WEBSITE));
  	OS::get_singleton()->print("Free and open source software under the terms of the MIT license.\n");
-@@ -435,6 +436,7 @@ void Main::print_help(const char *p_binary) {
+@@ -468,6 +469,7 @@ void Main::print_help(const char *p_binary) {
  #endif
  	OS::get_singleton()->print("\n");
  }
@@ -30,7 +31,7 @@ index 2326e519bf..dddcae0be2 100644
  
  #ifdef TESTS_ENABLED
  // The order is the same as in `Main::setup()`, only core and some editor types
-@@ -679,7 +681,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -721,7 +723,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  	List<String> args;
  	List<String> main_args;
  	List<String> user_args;
@@ -40,7 +41,7 @@ index 2326e519bf..dddcae0be2 100644
  	List<String> platform_args = OS::get_singleton()->get_cmdline_platform_args();
  
  	// Add command line arguments.
-@@ -774,6 +778,19 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -816,6 +820,19 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  		}
  #endif
  
@@ -60,7 +61,7 @@ index 2326e519bf..dddcae0be2 100644
  		if (adding_user_args) {
  			user_args.push_back(I->get());
  		} else if (I->get() == "-h" || I->get() == "--help" || I->get() == "/?") { // display help
-@@ -1315,18 +1328,15 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -1370,18 +1387,15 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  		} else {
  			main_args.push_back(I->get());
  		}
@@ -80,7 +81,7 @@ index 2326e519bf..dddcae0be2 100644
  	// Network file system needs to be configured before globals, since globals are based on the
  	// 'project.godot' file which will only be available through the network if this is enabled
  	FileAccessNetwork::configure();
-@@ -1348,7 +1358,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
+@@ -1403,7 +1417,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
  
  		FileAccess::make_default<FileAccessNetwork>(FileAccess::ACCESS_RESOURCES);
  	}
@@ -89,7 +90,7 @@ index 2326e519bf..dddcae0be2 100644
  	if (globals->setup(project_path, main_pack, upwards, editor) == OK) {
  #ifdef TOOLS_ENABLED
  		found_project = true;
-@@ -1848,9 +1858,11 @@ error:
+@@ -1910,9 +1924,11 @@ error:
  	args.clear();
  	main_args.clear();
  
@@ -101,12 +102,24 @@ index 2326e519bf..dddcae0be2 100644
  
  	EngineDebugger::deinitialize();
  
-@@ -1897,7 +1909,7 @@ error:
+@@ -1961,7 +1977,7 @@ Error Main::setup2() {
+ 	Thread::make_main_thread(); // Make whatever thread call this the main thread.
  
- Error Main::setup2(Thread::ID p_main_tid_override) {
  	// Print engine name and version
 -	print_line(String(VERSION_NAME) + " v" + get_full_version_string() + " - " + String(VERSION_WEBSITE));
 +	print_line("v" + get_full_version_string());
  
  	engine->startup_benchmark_begin_measure("servers");
  
+@@ -3311,9 +3327,11 @@ bool Main::iteration() {
+ 		movie_writer->add_frame(vp_tex);
+ 	}
+ 
++#ifdef TOOLS_ENABLED
+ 	if ((quit_after > 0) && (Engine::get_singleton()->_process_frames >= quit_after)) {
+ 		exit = true;
+ 	}
++#endif
+ 
+ 	if (fixed_fps != -1) {
+ 		return exit;
