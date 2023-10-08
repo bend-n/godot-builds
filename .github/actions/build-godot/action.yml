@@ -53,7 +53,7 @@ runs:
         [[ -n "${{ inputs.flags }}" ]] && scons_flags="${{ inputs.flags }}"
         [[ ${{ inputs.target }} == "editor" ]] && scons_flags="${scons_flags//disable_3d=yes/}" # remove disable_3d=yes if editor
         scons -j$((cores+2)) p=${{ inputs.platform }} target=${{ inputs.target }} use_lto=yes udev=yes $scons_flags
-        strip bin/* || true
+        [[ ${{ inputs.target}} != "editor" ]] && strip bin/* || true
         ls bin
         echo ::endgroup::
       shell: bash
