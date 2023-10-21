@@ -82,10 +82,10 @@ jobs:
       matrix:
         target: [template_release, template_debug]
     steps:
-      - name: Set up Java 11
+      - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
-          java-version: 11
+          java-version: 17
           distribution: temurin
 
       - name: Compilation (armv7)
