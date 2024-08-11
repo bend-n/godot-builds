@@ -1,3 +1,4 @@
+debug_symbols = "no"
 brotli = "yes"  # compression and woff2
 dbus = "no"  # screensaver and portal
 execinfo = "no"
