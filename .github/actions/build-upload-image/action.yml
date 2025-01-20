@@ -28,7 +28,7 @@ runs:
       with:
         name: linuxbsd-editor-release
 
-    - run: mv godot.linuxbsd.editor.x86_64 godot && chmod -v +x godot
+    - run: mv godot.x11.opt.64 godot && chmod -v +x godot
       shell: bash
 
     - name: Login to GitHub Container Registry

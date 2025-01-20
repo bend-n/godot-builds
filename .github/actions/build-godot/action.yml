@@ -52,8 +52,8 @@ runs:
         cores=$(nproc) || cores=$(sysctl -n hw.ncpu)
         [[ -n "${{ inputs.flags }}" ]] && scons_flags="${{ inputs.flags }}"
         [[ ${{ inputs.target }} == "editor" ]] && scons_flags="${scons_flags//disable_3d=yes/}" # remove disable_3d=yes if editor
-        [[ ${{ inputs.target }} == "editor" ]] && scons_flags="$scons_flags debug_symbols=no"
-        [[ ${{ inputs.target }} != "editor" ]] && scons_flags="$scons_flags deprecated=no"
+        [[ ${{ inputs.target }} == "editor" ]] && scons_flags="$scons_flags debug_symbols=no tools=yes"
+        [[ ${{ inputs.target }} != "editor" ]] && scons_flags="$scons_flags deprecated=no tools=no"
         scons -j$((cores+2)) p=${{ inputs.platform }} target=${{ inputs.target }} verbose=yes udev=yes dev_build=no lto=auto $scons_flags
         echo "compile done"
         [[ ${{ inputs.target}} != "editor" ]] && strip -v bin/* || true

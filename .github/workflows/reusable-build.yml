@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        target: [template_release, template_debug]
+        target: [release, release_debug]
         bits: [64]
     steps:
       - name: Compilation
@@ -53,12 +53,12 @@ jobs:
       - name: Upload artifact
         uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
-          path: godot/bin/*.x86_64
+          path: godot/bin/*.64
 
   windows:
     strategy:
       matrix:
-        target: [template_release, template_debug]
+        target: [release, release_debug]
         bits: [64]
     name: Win temps
     runs-on: windows-latest
@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        target: [template_release, template_debug]
+        target: [release, release_debug]
     steps:
       - name: Set up Java 17
         uses: actions/setup-java@v3
@@ -115,30 +115,14 @@ jobs:
   macos:
     strategy:
       matrix:
-        target: [template_release, template_debug]
+        target: [release, release_debug]
 
     name: macOS temps
     runs-on: macos-latest
     steps:
       - name: Install MoltenVK
-        run: | # curl https://raw.githubusercontent.com/godotengine/godot/master/misc/scripts/install_vulkan_sdk_macos.sh
-          curl -L "https://sdk.lunarg.com/sdk/download/latest/mac/vulkan-sdk.dmg" -o /tmp/vulkan-sdk.dmg
-          hdiutil attach /tmp/vulkan-sdk.dmg -mountpoint /Volumes/vulkan-sdk
-          /Volumes/vulkan-sdk/InstallVulkan.app/Contents/MacOS/InstallVulkan \
-              --accept-licenses --default-answer --confirm-command install
-          
-          cnt=5
-          until hdiutil detach -force /Volumes/vulkan-sdk
-          do
-             [[ cnt -eq "0" ]] && break
-             sleep 1
-             ((cnt--))
-          done
-          
-          rm -f /tmp/vulkan-sdk.dmg
-          
-          echo 'Vulkan SDK installed successfully! You can now build Godot by running "scons".'
-          
+        run: curl https://raw.githubusercontent.com/godotengine/godot/master/misc/scripts/install_vulkan_sdk_macos.sh -s | sh
+
       - name: Compilation(x86_64)
         uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
@@ -155,12 +139,12 @@ jobs:
 
       - name: Create universal
         run: |
-          [[ "${{ matrix.target }}" == *"debug"* ]] && target='.debug'
+          [[ "${{ matrix.target }}" == *"release_debug"* ]] && target='.debug'
           cd godot
-          intel=bin/godot.macos.*.x86_64
-          arm=bin/godot.macos.*.arm64
-          lipo -create $intel $arm -output "bin/godot.macos.opt$target.universal"
-          strip "bin/godot.macos.opt$target.universal"
+          intel=bin/godot.osx.*.x86_64
+          arm=bin/godot.osx.*.arm64
+          lipo -create $intel $arm -output "bin/godot.osx.opt$target.universal"
+          strip "bin/godot.osx.opt$target.universal"
 
       - name: Upload artifact
         uses: bend-n/godot-builds/.github/actions/upload-artifact@main
@@ -170,8 +154,8 @@ jobs:
   web:
     strategy:
       matrix:
-        target: [template_release, template_debug]
-        flags: [dlink_enabled=yes, ""]
+        target: [release]
+        flags: [gdnative_enabled=yes, threads_enabled=yes, ""]
 
     name: JS temps
     runs-on: ubuntu-20.04
@@ -199,7 +183,7 @@ jobs:
   templates:
     needs: [web, macos, windows, linux, android]
     name: Bundle all templates
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       tmps: "templates"
     steps:
@@ -222,36 +206,32 @@ jobs:
           bug="template_debug"
           mkdir -vp "$tmps"
           echo "Preparing linux"
-          linux="godot.linuxbsd"
-          mv "linux/$linux.$bug.x86_64" "$tmps/linux_debug.x86_64"
-          mv "linux/$linux.$rel.x86_64" "$tmps/linux_release.x86_64"
+          linux="godot.x11.opt"
+          mv "linux/$linux.64" "$tmps/linux_x11_debug.x86_64"
+          mv "linux/$linux.debug.64" "$tmps/linux_x11_release.x86_64"
 
           echo "Preparing windows"
-          windows="godot.windows"
-          mv "windows/$windows.$bug.x86_64.console.exe" "$tmps/windows_debug_x86_64_console.exe"
-          mv "windows/$windows.$bug.x86_64.exe" "$tmps/windows_debug_x86_64.exe"
-          mv "windows/$windows.$rel.x86_64.console.exe" "$tmps/windows_release_x86_64_console.exe"
-          mv "windows/$windows.$rel.x86_64.exe" "$tmps/windows_release_x86_64.exe"
+          windows="godot.windows.opt"
+          # mv "windows/$windows.debug.64.exe" "$tmps/windows_debug_x86_64.exe"
+          mv "windows/$windows.64.exe" "$tmps/windows_release_x86_64.exe"
 
           echo "Preparing android"
-          mv "android/android_debug.apk" "$tmps/android_debug.apk"
+          # mv "android/android_debug.apk" "$tmps/android_debug.apk"
           mv "android/android_release.apk" "$tmps/android_release.apk"
 
           echo "Preparing macos"
-          mac="godot.macos.opt"
-          cp -r "godot-repo/misc/dist/macos_template.app" "."
-          mkdir -p "macos_template.app/Contents/MacOS"
-          cp "macos/$mac.universal" "macos_template.app/Contents/MacOS/godot_macos_release.universal"
-          cp "macos/$mac.debug.universal" "macos_template.app/Contents/MacOS/godot_macos_debug.universal"
-          chmod +x macos_template.app/Contents/MacOS/godot_macos_*.universal
-          zip -q -9 -r "$tmps/macos.zip" "macos_template.app"
+          mac="godot.osx.opt"
+          cp -r "godot-repo/misc/dist/osx_template.app" "."
+          mkdir -p "osx_template.app/Contents/MacOS"
+          cp "macos/$mac.universal" "osx_template.app/Contents/MacOS/godot_osx_release.64"
+          # cp "macos/$mac.debug.universal" "osx_template.app/Contents/MacOS/godot_osx_debug.64"
+          chmod +x osx_template.app/Contents/MacOS/*.64
+          zip -q -9 -r "$tmps/osz.zip" "osx_template.app"
 
           echo "Preparing web"
-          web="godot.web"
-          mv "web/$web.$rel.wasm32.zip" "$tmps/web_release.zip"
-          mv "web/$web.$bug.wasm32.zip" "$tmps/web_debug.zip"
-          mv "web/$web.$rel.wasm32.dlink.zip" "$tmps/web_dlink_release.zip"
-          mv "web/$web.$bug.wasm32.dlink.zip" "$tmps/web_dlink_debug.zip"
+          web="godot.javascript.opt"
+          mv "web/$web.zip" "$tmps/webassembly_release.zip"
+          mv "web/$web.gdnative.zip" "$tmps/webassembly_gdnative_release.zip"
 
       - name: Prepare bundle
         run: cd "${tmps}" && zip -qr9 templates.tpz ./*
@@ -269,13 +249,13 @@ jobs:
         uses: bend-n/godot-builds/.github/actions/build-godot@main
         with:
           platform: linuxbsd
-          target: editor
+          target: release
 
       - name: Upload artifact
         uses: bend-n/godot-builds/.github/actions/upload-artifact@main
         with:
           name: linuxbsd-editor-release
-          path: godot/bin/*.x86_64
+          path: godot/bin/*.64
 
   image:
     if: inputs.make-release == 'yes'
