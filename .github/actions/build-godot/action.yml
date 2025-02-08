@@ -11,6 +11,9 @@ inputs:
   target:
     description: Target (template_release, template_debug, editor)
     required: true
+  tools:
+    description: Tools!
+    default: "no"
 
 runs:
   using: "composite"
@@ -48,12 +51,11 @@ runs:
       run: |
         echo ::group::Compilation
         cd godot
-        scons_flags=${{ env.flags }}
+        scons_flags="${{ env.flags }} ${{ inputs.flags }} tools=${{ inputs.tools }}"
         cores=$(nproc) || cores=$(sysctl -n hw.ncpu)
-        [[ -n "${{ inputs.flags }}" ]] && scons_flags="${{ inputs.flags }}"
-        [[ ${{ inputs.target }} == "editor" ]] && scons_flags="${scons_flags//disable_3d=yes/}" # remove disable_3d=yes if editor
-        [[ ${{ inputs.target }} == "editor" ]] && scons_flags="$scons_flags debug_symbols=no tools=yes"
-        [[ ${{ inputs.target }} != "editor" ]] && scons_flags="$scons_flags deprecated=no tools=no"
+        [[ ${{ inputs.tools }} == "yes" ]] && scons_flags="${scons_flags//disable_3d=yes/}" # remove disable_3d=yes if editor
+        [[ ${{ inputs.tools }} == "yes" ]] && scons_flags="$scons_flags debug_symbols=no"
+        [[ ${{ inputs.target }} ]] && scons_flags="$scons_flags deprecated=no"
         scons -j$((cores+2)) p=${{ inputs.platform }} target=${{ inputs.target }} verbose=yes udev=yes dev_build=no lto=auto $scons_flags
         echo "compile done"
         [[ ${{ inputs.target}} != "editor" ]] && strip -v bin/* || true

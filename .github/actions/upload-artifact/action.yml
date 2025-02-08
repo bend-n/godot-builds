@@ -5,7 +5,7 @@ description: Uploads the artifact
 inputs:
   name:
     description: The artifact name.
-    default: "${{ github.job }}"
+    default: "${{ github.job }}-${{ matrix.target }}"
     required: true
   path:
     description: The path to upload.
@@ -16,7 +16,7 @@ runs:
   using: "composite"
   steps:
     - name: Upload Godot Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}
